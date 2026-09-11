@@ -76,7 +76,6 @@ export function EditScheduleDialog({
     } else {
       setSuccessMsg("Jadwal berhasil diperbarui!");
 
-      // Jeda sebentar sebelum dialog tertutup otomatis
       setTimeout(() => {
         setOpen(false);
         setSuccessMsg(null);
@@ -94,8 +93,12 @@ export function EditScheduleDialog({
         setSuccessMsg(null);
       }}
     >
-      <DialogTrigger className="h-6 w-6 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+      <DialogTrigger
+        className="w-full flex items-center gap-2 px-2 py-2 text-xs rounded-sm text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors outline-none select-none font-normal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Pencil className="h-3.5 w-3.5" />
+        <span>Edit</span>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
@@ -104,7 +107,6 @@ export function EditScheduleDialog({
         </DialogHeader>
 
         <form onSubmit={handleUpdate} className="space-y-4 mt-2">
-          {/* Status Box Error */}
           {errorMsg && (
             <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
               <AlertCircle className="h-4 w-4 shrink-0" />
@@ -112,7 +114,6 @@ export function EditScheduleDialog({
             </div>
           )}
 
-          {/* Status Box Success */}
           {successMsg && (
             <div className="flex items-center gap-2 p-3 text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 rounded-md border border-emerald-500/20">
               <CheckCircle2 className="h-4 w-4 shrink-0" />

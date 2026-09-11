@@ -14,9 +14,7 @@ import {
   Schedule,
   DAYS_OF_WEEK,
 } from "@/lib/schedule-utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Trash2,
   Loader2,
@@ -29,6 +27,7 @@ import {
   Download,
   FileSpreadsheet,
   FileText,
+  CogIcon,
 } from "lucide-react";
 import {
   Select,
@@ -42,6 +41,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -143,8 +143,8 @@ export default function SchedulePage() {
     router.refresh();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin mau hapus jadwal ini, bosku?")) return;
+  const handleDelete = async (id: string, courseName: string) => {
+    if (!confirm(`Yakin mau hapus jadwal "${courseName}", bosku?`)) return;
     const { error } = await supabase.from("schedules").delete().eq("id", id);
     if (!error) reloadSchedules();
   };
@@ -244,14 +244,17 @@ export default function SchedulePage() {
           {/* Export Rekap Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "gap-2 h-9 text-xs w-full md:w-auto cursor-pointer bg-background/50 border-border/60 hover:bg-muted/50"
-              )}
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span>Export Rekap</span>
-            </DropdownMenuTrigger>
+              render={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 h-9 text-xs w-full md:w-auto cursor-pointer bg-background/50 border-border/60 hover:bg-muted/50"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export Rekap</span>
+                </Button>
+              }
+            />
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
                 onClick={() => exportToExcel(filteredSchedules)}
@@ -272,136 +275,161 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Grid Jadwal Hari (5 Kolom untuk Senin-Jumat) */}
+      {/* Timeline Layout per Hari (Clean, Simple, & Minimalist) */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-7 w-7 animate-spin text-muted-foreground/60" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="space-y-10">
           {DAYS_OF_WEEK.map((day) => {
             const isToday = day === todayName;
             const daySchedules = filteredSchedules.filter((s) => s.day === day);
 
             return (
-              <Card
+              <div
                 key={day}
-                className={`flex flex-col transition-all duration-200 rounded-xl border-border/60 ${
+                className={cn(
+                  "rounded-2xl border p-6 md:p-8 transition-all duration-200",
                   isToday
-                    ? "border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30 bg-card"
-                    : "bg-card/60 hover:border-border"
-                }`}
+                    ? "border-emerald-500/40 bg-card/80 shadow-sm ring-1 ring-emerald-500/20"
+                    : "border-border/40 bg-card/30"
+                )}
               >
-                <CardHeader className="pb-3 border-b border-border/40 bg-muted/20 flex flex-row items-center justify-between rounded-t-xl">
-                  <CardTitle className="text-base font-semibold tracking-tight">
-                    {day}
-                  </CardTitle>
+                {/* Header Hari */}
+                <div className="flex items-center justify-between pb-5 mb-6 border-b border-border/40">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-semibold text-base tracking-tight text-foreground">
+                      {day}
+                    </h3>
+                    <span className="text-xs text-muted-foreground font-medium px-2.5 py-0.5 rounded-full bg-muted/60">
+                      {daySchedules.length} Sesi
+                    </span>
+                  </div>
                   {isToday && (
-                    <Badge
-                      variant="outline"
-                      className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 text-[11px] font-medium gap-1.5 py-0.5 px-2.5"
-                    >
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Hari Ini
-                    </Badge>
+                    </span>
                   )}
-                </CardHeader>
-                <CardContent className="pt-4 flex-1">
-                  {daySchedules.length === 0 ? (
-                    <p className="text-xs text-muted-foreground/70 text-center py-8 italic">
-                      Tidak ada jadwal
-                    </p>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {daySchedules.map((item) => {
-                        const isConflict = conflictingIds.has(item.id);
-                        const isActive = isSessionActive(
-                          item.day,
-                          item.start_time,
-                          item.end_time,
-                        );
+                </div>
 
-                        return (
+                {/* List Jadwal Timeline */}
+                {daySchedules.length === 0 ? (
+                  <p className="text-xs text-muted-foreground/50 italic py-6 text-center">
+                    Tidak ada jadwal perkuliahan pada hari ini.
+                  </p>
+                ) : (
+                  <div className="relative pl-5 md:pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-border/60">
+                    {daySchedules.map((item) => {
+                      const isConflict = conflictingIds.has(item.id);
+                      const isActive = isSessionActive(
+                        item.day,
+                        item.start_time,
+                        item.end_time
+                      );
+
+                      return (
+                        <div key={item.id} className="relative pl-6 group">
+                          {/* Titik Indikator Timeline (Sejajar Pas dengan Garis) */}
                           <div
-                            key={item.id}
-                            className={`p-3.5 rounded-lg border transition-all duration-150 group relative ${
+                            className={cn(
+                              "absolute -left-[23px] top-1.5 h-3.5 w-3.5 rounded-full border-2 bg-background transition-transform group-hover:scale-125 z-10",
                               isActive
-                                ? "border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                                ? "border-emerald-500 bg-emerald-500"
                                 : isConflict
-                                  ? "border-rose-500/40 bg-rose-500/5 ring-1 ring-rose-500/20"
-                                  : "bg-muted/30 border-border/40 hover:bg-muted/50 hover:border-border/80"
-                            }`}
-                          >
-                            {/* Status Indicator */}
-                            {(isActive || isConflict) && (
-                              <div className="flex items-center gap-2 mb-2">
-                                {isActive && (
-                                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                                    <Radio className="h-3 w-3 animate-pulse text-emerald-500" />
-                                    Sedang Berlangsung
-                                  </span>
-                                )}
-                                {isConflict && (
-                                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md">
-                                    <AlertTriangle className="h-3 w-3 text-rose-500" />
-                                    Bentrok Ruangan & Jam!
-                                  </span>
-                                )}
-                              </div>
+                                ? "border-rose-500 bg-rose-500"
+                                : "border-muted-foreground/40 bg-muted"
                             )}
+                          />
 
-                            {/* Judul & Jam */}
-                            <div className="flex justify-between items-start gap-2 mb-1.5 pr-14">
-                              <span className="font-semibold text-sm leading-snug">
+                          {/* Baris Konten Bersih (Tanpa Card Box) */}
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-border/20 last:border-0 last:pb-0">
+                            <div className="space-y-1 flex-1">
+                              {/* Status Badges kecil jika aktif/bentrok */}
+                              {(isActive || isConflict) && (
+                                <div className="flex items-center gap-2 mb-1">
+                                  {isActive && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                                      <Radio className="h-3 w-3 animate-pulse text-emerald-500" />
+                                      Sedang Berlangsung
+                                    </span>
+                                  )}
+                                  {isConflict && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">
+                                      <AlertTriangle className="h-3 w-3 text-rose-500" />
+                                      Bentrok Jadwal
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              <h4 className="font-medium text-sm text-foreground leading-snug">
                                 {item.course_name}
-                              </span>
+                              </h4>
+                              
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                <span className="font-medium text-foreground/80">📍 {item.room}</span>
+                                <span>&bull;</span>
+                                <span>{item.prodi}</span>
+                              </div>
                             </div>
 
-                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/30">
-                              <span className="text-[11px] text-muted-foreground font-medium">
-                                {item.prodi}
-                              </span>
+                            {/* Waktu & Tombol Aksi Admin */}
+                            <div className="flex items-center justify-between md:justify-end gap-4">
                               <span
-                                className={`text-[11px] font-mono px-2 py-0.5 rounded font-medium ${
+                                className={cn(
+                                  "text-xs font-mono px-2.5 py-1 rounded-md font-medium",
                                   isActive
                                     ? "bg-emerald-600 text-white"
                                     : isConflict
-                                      ? "bg-rose-600 text-white"
-                                      : "bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900"
-                                }`}
+                                    ? "bg-rose-600 text-white"
+                                    : "bg-muted/70 text-muted-foreground"
+                                )}
                               >
                                 {item.start_time} - {item.end_time}
                               </span>
+
+                              {isAdmin && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger
+                                    render={
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground/60 hover:text-foreground rounded-lg"
+                                      >
+                                        <CogIcon className="h-4 w-4" />
+                                      </Button>
+                                    }
+                                  />
+                                  <DropdownMenuContent align="end" className="w-36 text-xs">
+                                    <EditScheduleDialog
+                                      schedule={item}
+                                      onSuccess={reloadSchedules}
+                                    />
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      variant="destructive"
+                                      onClick={() =>
+                                        handleDelete(item.id, item.course_name)
+                                      }
+                                      className="cursor-pointer gap-2 py-1.5 text-xs text-rose-600 focus:text-rose-600"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                      <span>Hapus</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
                             </div>
-
-                            <p className="text-[11px] text-muted-foreground/80 mt-1">
-                              📍 {item.room}
-                            </p>
-
-                            {/* Tombol Admin */}
-                            {isAdmin && (
-                              <div className="absolute top-2.5 right-2.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm p-0.5 rounded-md border border-border/50 shadow-sm">
-                                <EditScheduleDialog
-                                  schedule={item}
-                                  onSuccess={reloadSchedules}
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                  onClick={() => handleDelete(item.id)}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
