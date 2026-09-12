@@ -56,30 +56,30 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
   }, [allRooms, todaySchedules, currentTime]);
 
   return (
-    <Card className="bg-card/60 backdrop-blur-sm border-border/60 rounded-xl shadow-sm">
-      <CardHeader className="pb-4 border-b border-border/40 rounded-t-xl flex flex-row items-center justify-between">
+    <Card className="bg-card/20 backdrop-blur-md border-fuchsia-900/30 rounded-xl">
+      <CardHeader className="pb-4 border-b border-fuchsia-900/30 rounded-t-xl flex flex-row items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+          <div className="p-2 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400">
             <MonitorPlay className="h-5 w-5 animate-pulse" />
           </div>
           <div>
-            <CardTitle className="text-base font-semibold tracking-tight">
+            <CardTitle className="text-base font-semibold tracking-tight text-foreground">
               Monitor Status Lab & Ruangan Hari Ini ({todayName})
             </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground/80 mt-0.5">
               Pemantauan penggunaan laboratorium secara langsung berdasarkan waktu sistem.
             </p>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono bg-background/60 px-3 py-1.5 rounded-md border border-border/60">
-          <Clock className="h-3.5 w-3.5 text-emerald-500" />
+        <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1.5 rounded-md border border-fuchsia-900/40 bg-fuchsia-950/20">
+          <Clock className="h-3.5 w-3.5 text-fuchsia-400" />
           <span>{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} WITA</span>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-6">
+      <CardContent className="pt-1">
         {allRooms.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-6 italic">
+          <p className="text-xs text-muted-foreground/50 text-center py-6 italic">
             Belum ada data ruangan atau jadwal terdaftar.
           </p>
         ) : (
@@ -87,36 +87,36 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
             {roomStatuses.map(({ room, activeSchedule, upcomingSchedule, totalToday }) => (
               <div
                 key={room}
-                className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between ${
+                className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
                   activeSchedule
-                    ? "border-emerald-500/50 bg-emerald-500/5 dark:bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/20"
-                    : "bg-muted/30 border-border/50 hover:border-border/80"
+                    ? "border-fuchsia-500/50 bg-fuchsia-950/30 shadow-md shadow-fuchsia-950/20 ring-1 ring-fuchsia-500/30"
+                    : "bg-fuchsia-950/10 border-fuchsia-900/20 hover:border-fuchsia-900/40"
                 }`}
               >
                 <div>
                   {/* Header Ruangan & Badge Status */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded border border-border/60 text-foreground/80">
+                      <div className="p-1.5 rounded border border-fuchsia-900/40 bg-fuchsia-950/40 text-fuchsia-300">
                         <Building2 className="h-4 w-4" />
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{room}</span>
+                      <span className="font-bold text-sm tracking-tight text-foreground">{room}</span>
                     </div>
 
                     {activeSchedule ? (
                       <Badge
                         variant="outline"
-                        className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 text-[10px] font-medium gap-1 py-0.5"
+                        className="bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30 text-[10px] font-medium gap-1 py-0.5"
                       >
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 animate-pulse" />
                         Sedang Digunakan
                       </Badge>
                     ) : (
                       <Badge
                         variant="outline"
-                        className="bg-muted text-muted-foreground border-border/60 text-[10px] font-medium gap-1 py-0.5"
+                        className="bg-muted/30 text-muted-foreground border-fuchsia-900/30 text-[10px] font-medium gap-1 py-0.5"
                       >
-                        <CheckCircle2 className="h-3 w-3 text-slate-500" />
+                        <CheckCircle2 className="h-3 w-3 text-muted-foreground/70" />
                         Tersedia / Kosong
                       </Badge>
                     )}
@@ -124,41 +124,41 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
                   {/* Konten Detail Kelas */}
                   {activeSchedule ? (
-                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg bg-background/60 border border-emerald-500/20">
-                      <p className="text-xs font-semibold text-foreground line-clamp-1">
+                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg bg-black/40 border border-fuchsia-500/20">
+                      <p className="text-xs font-semibold text-fuchsia-200 line-clamp-1">
                         {activeSchedule.course_name}
                       </p>
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                         <span>{activeSchedule.prodi}</span>
-                        <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                        <span className="font-mono font-medium text-fuchsia-400">
                           {activeSchedule.start_time} - {activeSchedule.end_time}
                         </span>
                       </div>
                     </div>
                   ) : upcomingSchedule ? (
-                    <div className="space-y-1 my-2 p-2.5 rounded-lg bg-background/40 border border-border/40">
+                    <div className="space-y-1 my-2 p-2.5 rounded-lg bg-black/20 border border-fuchsia-900/20">
                       <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80 font-medium">
-                        <AlertCircle className="h-3 w-3 text-amber-500" />
+                        <AlertCircle className="h-3 w-3 text-amber-400" />
                         <span>Kelas Berikutnya:</span>
                       </div>
                       <p className="text-xs font-medium text-foreground line-clamp-1">
                         {upcomingSchedule.course_name} ({upcomingSchedule.prodi})
                       </p>
-                      <p className="text-[11px] font-mono text-muted-foreground">
+                      <p className="text-[11px] font-mono text-muted-foreground/80">
                         Mulai pukul {upcomingSchedule.start_time}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground/70 italic py-3 text-center">
+                    <p className="text-xs text-muted-foreground/50 italic py-3 text-center">
                       Tidak ada kelas lagi hari ini.
                     </p>
                   )}
                 </div>
 
                 {/* Footer Kecil */}
-                <div className="mt-3 pt-2.5 border-t border-border/30 flex items-center justify-between text-[11px] text-muted-foreground">
+                <div className="mt-3 pt-2.5 border-t border-fuchsia-900/20 flex items-center justify-between text-[11px] text-muted-foreground/80">
                   <span>Total Sesi Hari Ini:</span>
-                  <span className="font-mono font-semibold text-foreground">
+                  <span className="font-mono font-semibold text-fuchsia-300">
                     {totalToday} Sesi
                   </span>
                 </div>

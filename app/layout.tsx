@@ -20,7 +20,7 @@ export default function RootLayout({
       lang="id"
       className="h-full antialiased dark"
     >
-      <body className={`${inter.className} min-h-full flex flex-col bg-linear-to-br from-black to-fuchsia-950 bg-fixed`}>
+      <body className={`${inter.className} min-h-full flex flex-col bg-linear-to-br from-black via-black to-fuchsia-950 bg-fixed`}>
         {" "}
         {children}
         <Toaster />
