@@ -57,7 +57,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
   return (
     <Card className="bg-card/60 backdrop-blur-sm border-border/60 rounded-xl shadow-sm">
-      <CardHeader className="pb-4 border-b border-border/40 bg-muted/20 rounded-t-xl flex flex-row items-center justify-between">
+      <CardHeader className="pb-4 border-b border-border/40 rounded-t-xl flex flex-row items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
             <MonitorPlay className="h-5 w-5 animate-pulse" />
@@ -97,7 +97,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                   {/* Header Ruangan & Badge Status */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded bg-background border border-border/60 text-foreground/80">
+                      <div className="p-1.5 rounded border border-border/60 text-foreground/80">
                         <Building2 className="h-4 w-4" />
                       </div>
                       <span className="font-bold text-sm tracking-tight">{room}</span>

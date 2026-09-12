@@ -18,7 +18,9 @@ export const DAYS_OF_WEEK = [
   "Selasa",
   "Rabu",
   "Kamis",
-  "Jumat"
+  "Jumat",
+  "Sabtu",
+  "Minggu"
 ];
 
 export function getCurrentDayName(): string {

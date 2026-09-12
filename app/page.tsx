@@ -160,7 +160,7 @@ export default function SchedulePage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Jadwal Kelas Semester
+            KalenderHub
           </h1>
           <p className="text-muted-foreground">
             Lihat dan kelola jadwal perkuliahan mingguan.
@@ -170,14 +170,14 @@ export default function SchedulePage() {
           {isAdmin ? (
             <>
               <AddScheduleDialog onSuccess={reloadSchedules} />
-              <Button variant="outline" onClick={handleLogout}>
+              <Button className="cursor-pointer" variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> Logout
               </Button>
             </>
           ) : (
             <Link href="/login">
-              <Button variant="outline">
-                <LogIn className="mr-2 h-4 w-4" /> Login Admin
+              <Button variant="outline" className="cursor-pointer">
+                <LogIn className="mr-2 h-4 w-4" /> Login
               </Button>
             </Link>
           )}
@@ -185,10 +185,10 @@ export default function SchedulePage() {
       </div>
 
       {/* Bar Filter & Export */}
-      <div className="bg-card/60 backdrop-blur-sm border border-border/60 rounded-xl p-3.5 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="bg-card/30 border border-border/60 rounded-xl p-3.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-semibold px-1 text-muted-foreground">
-          <div className="p-1.5 rounded-md bg-muted/60 border border-border/40">
-            <Filter className="h-3.5 w-3.5 text-foreground/80" />
+          <div className="p-1.5 rounded-md border border-border/60">
+            <Filter className="h-3.5 w-3.5" />
           </div>
           <span>Filter & Rekap</span>
         </div>
@@ -202,7 +202,7 @@ export default function SchedulePage() {
             <SelectTrigger className="w-full md:w-[200px] h-9 text-xs bg-background/50 border-border/60">
               <SelectValue placeholder="Semua Program Studi" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-transparent backdrop-blur-sm">
               {prodiOptions.map((prodi) => (
                 <SelectItem key={prodi} value={prodi} className="text-xs">
                   {prodi}
@@ -219,7 +219,7 @@ export default function SchedulePage() {
             <SelectTrigger className="w-full md:w-[170px] h-9 text-xs bg-background/50 border-border/60">
               <SelectValue placeholder="Semua Ruangan" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-transparent backdrop-blur-sm">
               {roomOptions.map((room) => (
                 <SelectItem key={room} value={room} className="text-xs">
                   {room}
@@ -251,24 +251,24 @@ export default function SchedulePage() {
                   className="gap-2 h-9 text-xs w-full md:w-auto cursor-pointer bg-background/50 border-border/60 hover:bg-muted/50"
                 >
                   <Download className="h-3.5 w-3.5" />
-                  <span>Export Rekap</span>
+                  <span>Export</span>
                 </Button>
               }
             />
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 bg-transparent backdrop-blur-sm">
               <DropdownMenuItem
                 onClick={() => exportToExcel(filteredSchedules)}
                 className="cursor-pointer gap-2 text-xs py-2"
               >
                 <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Export Excel (.xlsx)</span>
+                <span>Excel (.xlsx)</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => exportToPDF(filteredSchedules)}
                 className="cursor-pointer gap-2 text-xs py-2"
               >
                 <FileText className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-                <span>Export PDF (.pdf)</span>
+                <span>PDF (.pdf)</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -292,8 +292,8 @@ export default function SchedulePage() {
                 className={cn(
                   "rounded-2xl border p-6 md:p-8 transition-all duration-200",
                   isToday
-                    ? "border-emerald-500/40 bg-card/80 shadow-sm ring-1 ring-emerald-500/20"
-                    : "border-border/40 bg-card/30"
+                    ? "border-emerald-500/40 bg-card/60 shadow-sm ring-1 ring-emerald-500/20"
+                    : "border-border/60 bg-card/30"
                 )}
               >
                 {/* Header Hari */}
