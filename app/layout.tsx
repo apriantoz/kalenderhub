@@ -18,9 +18,9 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className="h-full antialiased dark"
+      className="h-full antialiased"
     >
-      <body className={`${inter.className} min-h-full flex flex-col bg-linear-to-br from-black via-black to-fuchsia-950 bg-fixed`}>
+      <body className={`${inter.className} min-h-full flex flex-col bg-linear-to-br from-slate-50 to-slate-100 bg-fixed`}>
         {" "}
         {children}
         <Toaster />
