@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { Schedule, getCurrentDayName, isSessionActive } from "@/lib/schedule-utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MonitorPlay, Clock, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
 
@@ -56,25 +56,27 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
   }, [allRooms, todaySchedules, currentTime]);
 
   return (
-    <Card className="bg-card/20 backdrop-blur-md rounded-xl">
+    <Card>
       <CardHeader className="pb-4 border-b rounded-t-xl flex flex-row items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+          <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
             <MonitorPlay className="h-5 w-5 animate-pulse" />
           </div>
           <div>
-            <CardTitle className="text-base font-semibold tracking-tight text-foreground">
+            <CardTitle className="text-base font-semibold tracking-tight">
               Monitor Status Lab & Ruangan Hari Ini ({todayName})
             </CardTitle>
-            <p className="text-xs text-muted-foreground/80 mt-0.5">
+            <CardDescription className="text-xs text-muted-foreground/80 mt-0.5">
               Pemantauan penggunaan laboratorium secara langsung berdasarkan waktu sistem.
-            </p>
+            </CardDescription>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1.5 rounded-md border">
-          <Clock className="h-3.5 w-3.5" />
-          <span>{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} WITA</span>
-        </div>
+        <CardAction>
+          <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1.5 rounded-md border">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} WITA</span>
+          </div>
+        </CardAction>
       </CardHeader>
 
       <CardContent className="pt-1">
@@ -83,7 +85,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
             Belum ada data ruangan atau jadwal terdaftar.
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
             {roomStatuses.map(({ room, activeSchedule, upcomingSchedule, totalToday }) => (
               <div
                 key={room}
@@ -98,9 +100,9 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 rounded border">
-                        <Building2 className="h-4 w-4" />
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <span className="font-bold text-sm tracking-tight text-foreground">{room}</span>
+                      <span className="font-bold text-sm tracking-tight">{room}</span>
                     </div>
 
                     {activeSchedule ? (
@@ -141,7 +143,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                         <AlertCircle className="h-3 w-3 text-amber-400" />
                         <span>Kelas Berikutnya:</span>
                       </div>
-                      <p className="text-xs font-medium text-foreground line-clamp-1">
+                      <p className="text-xs font-medium line-clamp-1">
                         {upcomingSchedule.course_name} ({upcomingSchedule.prodi})
                       </p>
                       <p className="text-[11px] font-mono text-muted-foreground/80">

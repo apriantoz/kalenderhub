@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
 
-const inter = Inter({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "KalenderHub - Pengelola Jadwal Kelas",
@@ -18,9 +18,9 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className="h-full antialiased"
+      className={`${geist.className} h-full antialiased`}
     >
-      <body className={`${inter.className} min-h-full flex flex-col bg-linear-to-br from-slate-50 to-slate-100 bg-fixed`}>
+      <body className="min-h-full flex flex-col bg-slate-50 bg-fixed">
         {" "}
         {children}
         <Toaster />
