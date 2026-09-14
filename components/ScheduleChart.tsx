@@ -113,10 +113,9 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
           <div className="grid gap-1">
             <div className="flex items-center gap-1.5 font-medium leading-none">
               Total {totalClasses} sesi perkuliahan aktif minggu ini
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
             </div>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              Senin - Sabtu
+              Senin - Jumat
             </div>
           </div>
         </div>

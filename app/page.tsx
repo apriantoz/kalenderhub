@@ -59,6 +59,7 @@ import { PRODI } from "@/lib/prodi-constants";
 import { Badge } from "@/components/ui/badge";
 import { ScheduleChart } from "@/components/ScheduleChart";
 import { RoomUsageChart } from "@/components/RoomUsageChart";
+import { FooterHub } from "@/components/FooterHub";
 
 export default function SchedulePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -484,6 +485,7 @@ export default function SchedulePage() {
       </div>
       {/* Komponen Monitor Lab Real-Time di Bagian Bawah */}
       {!loading && <LiveLabMonitor schedules={schedules} />}
+      <FooterHub/>
     </div>
   );
 }

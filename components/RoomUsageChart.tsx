@@ -59,7 +59,7 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
               Statistik Penggunaan Ruangan
             </CardTitle>
             <CardDescription className="text-xs">
-              Intensitas pemakaian kelas di setiap Lab
+              Intensitas pemakaian ruang lab
             </CardDescription>
           </div>
           <div className="p-2 border rounded-lg bg-muted/50 text-muted-foreground">
@@ -112,7 +112,7 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
             {busiestRoom && busiestRoom.usage > 0 ? (
               <div className="flex items-center gap-1.5 font-medium leading-none">
                 <BarChart3 className="h-3.5 w-3.5 text-indigo-500" />
-                {busiestRoom.room} paling padat dengan {busiestRoom.usage} sesi
+                {busiestRoom.room} {busiestRoom.usage} sesi
               </div>
             ) : (
               <div className="flex items-center gap-1.5 font-medium leading-none text-muted-foreground">
