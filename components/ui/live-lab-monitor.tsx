@@ -5,6 +5,7 @@ import { Schedule, getCurrentDayName, isSessionActive } from "@/lib/schedule-uti
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MonitorPlay, Clock, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
+import { LAB_ROOMS } from "@/lib/room-constants";
 
 interface LiveLabMonitorProps {
   schedules: Schedule[];
@@ -22,7 +23,8 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
   // Ambil daftar semua ruangan unik dari database
   const allRooms = useMemo(() => {
-    return Array.from(new Set(schedules.map((s) => s.room).filter(Boolean))).sort();
+    const dbRooms = schedules.map((s)=>s.room).filter(Boolean);
+    return Array.from(new Set([...LAB_ROOMS,...dbRooms])).sort();
   }, [schedules]);
 
   // Filter jadwal khusus hari ini
