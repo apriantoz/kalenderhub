@@ -66,10 +66,10 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
           </div>
           <div>
             <CardTitle className="text-base font-semibold tracking-tight">
-              Monitor Status Lab & Ruangan Hari Ini ({todayName})
+              Monitor Status Ruangan ({todayName})
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground/80 mt-0.5">
-              Pemantauan penggunaan laboratorium secara langsung berdasarkan waktu sistem.
+              Pemantauan penggunaan laboratorium komputer secara langsung berdasarkan waktu sistem.
             </CardDescription>
           </div>
         </div>
@@ -93,7 +93,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                 key={room}
                 className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
                   activeSchedule
-                    ? "border-indigo-500/50 bg-indigo-50 ring-1 ring-indigo-500/30"
+                    ? "border-indigo-500/30 bg-indigo-900/30"
                     : " hover:border-slate-300"
                 }`}
               >
@@ -101,16 +101,16 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                   {/* Header Ruangan & Badge Status */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded border">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <div className="p-1.5 rounded border border-indigo-500/30">
+                        <Building2 className="h-4 w-4 text-indigo-400" />
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{room}</span>
+                      <span className="font-bold text-sm tracking-tight">Ruang {room}</span>
                     </div>
 
                     {activeSchedule ? (
                       <Badge
                         variant="outline"
-                        className="text-[10px] font-medium border-indigo-400"
+                        className="text-[10px] font-medium border-indigo-500/30"
                       >
                         <span className="h-1.5 w-1.5 text-indigo-500 rounded-full bg-indigo-500 animate-ping" />
                         Sedang Digunakan
@@ -128,7 +128,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
                   {/* Konten Detail Kelas */}
                   {activeSchedule ? (
-                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg border">
+                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg border border-indigo-500/30">
                       <p className="text-xs font-semibold line-clamp-1">
                         {activeSchedule.course_name}
                       </p>
@@ -140,7 +140,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                       </div>
                     </div>
                   ) : upcomingSchedule ? (
-                    <div className="space-y-1 my-2 p-2.5 rounded-lg bg-black/20 border">
+                    <div className="space-y-1 my-2 p-2.5 rounded-lg border">
                       <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80 font-medium">
                         <AlertCircle className="h-3 w-3 text-amber-400" />
                         <span>Kelas Berikutnya:</span>

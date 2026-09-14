@@ -53,10 +53,12 @@ import {
   CardDescription,
   CardAction,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { LAB_ROOMS } from "@/lib/room-constants";
 import { PRODI } from "@/lib/prodi-constants";
+import { Badge } from "@/components/ui/badge";
+import { ScheduleChart } from "@/components/ScheduleChart";
+import { RoomUsageChart } from "@/components/RoomUsageChart";
 
 export default function SchedulePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -120,9 +122,8 @@ export default function SchedulePage() {
     };
   }, []);
 
-  // Opsi Dropdown Dinamis dari data yang ada
+  // Opsi Dropdown dari Constant
   const prodiOptions = PRODI;
-
   const roomOptions = LAB_ROOMS;
 
   // Data Jadwal Terfilter
@@ -200,7 +201,7 @@ export default function SchedulePage() {
                 Filter & Rekap
               </CardTitle>
               <CardDescription className="text-[11px] text-muted-foreground/80">
-                Saring data jadwal berdasarkan program studi atau ruangan.
+                Filter jadwal berdasarkan program studi atau ruangan.
               </CardDescription>
             </div>
           </div>
@@ -212,7 +213,7 @@ export default function SchedulePage() {
                 value={selectedProdi}
                 onValueChange={(val) => setSelectedProdi(val ?? "")}
               >
-                <SelectTrigger className="w-full md:w-[200px] h-9 text-xs bg-background/40">
+                <SelectTrigger className="w-full md:w-50 text-xs bg-background/40">
                   <SelectValue placeholder="Semua Program Studi" />
                 </SelectTrigger>
                 <SelectContent className="bg-background/50 backdrop-blur-md">
@@ -229,7 +230,7 @@ export default function SchedulePage() {
                 value={selectedRoom}
                 onValueChange={(val) => setSelectedRoom(val ?? "")}
               >
-                <SelectTrigger className="w-full md:w-[170px] h-9 text-xs bg-background/40">
+                <SelectTrigger className="w-full md:w-50 text-xs bg-background/40">
                   <SelectValue placeholder="Semua Ruangan" />
                 </SelectTrigger>
                 <SelectContent className="bg-background/50 backdrop-blur-md">
@@ -291,8 +292,8 @@ export default function SchedulePage() {
             </div>
           </CardAction>
         </CardHeader>
-        {/* Opsional jika ingin menambahkan CardContent jika ada tambahan elemen di bawahnya, atau dapat dikosongkan/dihapus jika filter sudah sepenuhnya di header */}
       </Card>
+
       {/* Timeline Layout per Hari */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
@@ -372,28 +373,33 @@ export default function SchedulePage() {
                             {/* Konten Timeline */}
                             <div className="flex-1 pb-6 min-w-0">
                               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b">
-                                <div className="space-y-1 flex-1 min-w-0">
-                                  {/* Status Badges kecil */}
-                                  {(isActive || isConflict) && (
-                                    <div className="flex items-center gap-2 mb-1">
-                                      {isActive && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded">
-                                          <Radio className="h-3 w-3 animate-pulse text-indigo-400" />
-                                          Sedang Berlangsung
-                                        </span>
-                                      )}
-                                      {isConflict && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-300 bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 rounded animate-pulse">
-                                          <AlertTriangle className="h-3 w-3 text-rose-400" />
-                                          Bentrok Jadwal
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
+                                <div className="space-y-1.5 flex-1 min-w-0">
+                                  {/* Nama Matkul & Status Badges Sejajar */}
+                                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                                    <h4 className="font-medium text-sm leading-snug truncate group-hover:text-slate-700 transition-colors">
+                                      {item.course_name}
+                                    </h4>
 
-                                  <h4 className="font-medium text-sm leading-snug truncate group-hover:text-slate-700 transition-colors">
-                                    {item.course_name}
-                                  </h4>
+                                    {isActive && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-[10px] font-medium gap-1 shrink-0"
+                                      >
+                                        <Radio className="h-3 w-3 animate-ping text-indigo-400" />
+                                        Sedang Berlangsung
+                                      </Badge>
+                                    )}
+
+                                    {isConflict && (
+                                      <Badge
+                                        variant="destructive"
+                                        className="text-[10px] font-medium gap-1 animate-pulse shrink-0"
+                                      >
+                                        <AlertTriangle className="h-3 w-3" />
+                                        Bentrok Jadwal
+                                      </Badge>
+                                    )}
+                                  </div>
 
                                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground/80">
                                     <span className="font-medium/90">
@@ -472,7 +478,10 @@ export default function SchedulePage() {
           })}
         </div>
       )}
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+        <ScheduleChart schedules={filteredSchedules} />
+        <RoomUsageChart schedules={schedules} />
+      </div>
       {/* Komponen Monitor Lab Real-Time di Bagian Bawah */}
       {!loading && <LiveLabMonitor schedules={schedules} />}
     </div>
