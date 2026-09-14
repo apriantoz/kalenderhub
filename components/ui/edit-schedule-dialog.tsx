@@ -142,7 +142,7 @@ export function EditScheduleDialog({
                 value={prodi}
                 onValueChange={(val) => setProdi(val ?? PRODI[0])}
               >
-                <SelectTrigger id="edit_prodi">
+                <SelectTrigger id="edit_prodi" className="w-full">
                   <SelectValue placeholder="Pilih Prodi" />
                 </SelectTrigger>
                 <SelectContent>
@@ -161,7 +161,7 @@ export function EditScheduleDialog({
                 value={semester}
                 onValueChange={(val) => setSemester(val ?? String(SEMESTERS[0]))}
               >
-                <SelectTrigger id="edit_semester">
+                <SelectTrigger id="edit_semester" className="w-full">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
                 <SelectContent>
@@ -182,7 +182,7 @@ export function EditScheduleDialog({
                 value={day}
                 onValueChange={(val) => setDay(val ?? DAYS_OF_WEEK[0])}
               >
-                <SelectTrigger id="edit_day">
+                <SelectTrigger id="edit_day" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -201,7 +201,7 @@ export function EditScheduleDialog({
                 value={room}
                 onValueChange={(val) => setRoom(val ?? LAB_ROOMS[0])}
               >
-                <SelectTrigger id="edit_room">
+                <SelectTrigger id="edit_room" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -124,7 +124,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="prodi">Program Studi</Label>
               <Select value={prodi} onValueChange={(val) => setProdi(val ?? PRODI[0])}>
-                <SelectTrigger id="prodi">
+                <SelectTrigger id="prodi" className="w-full">
                   <SelectValue placeholder="Pilih Prodi" />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,7 +140,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="semester">Semester</Label>
               <Select value={semester} onValueChange={(val) => setSemester(val ?? String(SEMESTERS[0]))}>
-                <SelectTrigger id="semester">
+                <SelectTrigger id="semester" className="w-full">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
                 <SelectContent>
@@ -158,7 +158,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="day">Hari</Label>
               <Select value={day} onValueChange={(val) => setDay(val ?? DAYS_OF_WEEK[0])}>
-                <SelectTrigger id="day">
+                <SelectTrigger id="day" className="w-full">
                   <SelectValue placeholder="Pilih Hari" />
                 </SelectTrigger>
                 <SelectContent>
@@ -174,7 +174,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="room">Ruangan Lab</Label>
               <Select value={room} onValueChange={(val) => setRoom(val ?? LAB_ROOMS[0])}>
-                <SelectTrigger id="room">
+                <SelectTrigger id="room" className="w-full">
                   <SelectValue placeholder="Pilih Ruangan" />
                 </SelectTrigger>
                 <SelectContent>
