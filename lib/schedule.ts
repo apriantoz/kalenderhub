@@ -6,6 +6,7 @@ export interface Session {
   course_name?: string;
   lecturer?: string;
   prodi?: string;
+  semester?:number;
   day: string;
   startTime?: string;
   start_time?: string;

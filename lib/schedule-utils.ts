@@ -2,6 +2,7 @@ export interface Schedule {
   id: string;
   course_name: string;
   prodi: string;
+  semester: number;
   room: string;
   day: string;
   start_time: string;

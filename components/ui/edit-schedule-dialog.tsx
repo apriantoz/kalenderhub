@@ -4,6 +4,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Schedule, DAYS_OF_WEEK } from "@/lib/schedule-utils";
 import { LAB_ROOMS } from "@/lib/room-constants";
+import { PRODI } from "@/lib/prodi-constants";
+import { SEMESTERS } from "@/lib/semester-constants";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,6 +42,7 @@ export function EditScheduleDialog({
 
   const [courseName, setCourseName] = useState(schedule.course_name);
   const [prodi, setProdi] = useState(schedule.prodi);
+  const [semester, setSemester] = useState(String(schedule.semester ?? SEMESTERS[0]));
   const [day, setDay] = useState(schedule.day);
   const [startTime, setStartTime] = useState(schedule.start_time);
   const [endTime, setEndTime] = useState(schedule.end_time);
@@ -50,7 +53,7 @@ export function EditScheduleDialog({
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!courseName || !prodi || !room) {
+    if (!courseName || !prodi || !room || !semester) {
       setErrorMsg("Semua field wajib diisi, bosku!");
       return;
     }
@@ -62,6 +65,7 @@ export function EditScheduleDialog({
       .update({
         course_name: courseName,
         prodi,
+        semester: Number(semester),
         day,
         start_time: startTime,
         end_time: endTime,
@@ -131,14 +135,44 @@ export function EditScheduleDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_prodi">Program Studi</Label>
-            <Input
-              id="edit_prodi"
-              value={prodi}
-              onChange={(e) => setProdi(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="edit_prodi">Program Studi</Label>
+              <Select
+                value={prodi}
+                onValueChange={(val) => setProdi(val ?? PRODI[0])}
+              >
+                <SelectTrigger id="edit_prodi">
+                  <SelectValue placeholder="Pilih Prodi" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODI.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      Prodi {r}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit_semester">Semester</Label>
+              <Select
+                value={semester}
+                onValueChange={(val) => setSemester(val ?? String(SEMESTERS[0]))}
+              >
+                <SelectTrigger id="edit_semester">
+                  <SelectValue placeholder="Pilih Semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SEMESTERS.map((sem) => (
+                    <SelectItem key={sem} value={String(sem)}>
+                      Semester {sem}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

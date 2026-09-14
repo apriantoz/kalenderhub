@@ -369,9 +369,9 @@ export default function SchedulePage() {
                                 className={cn(
                                   "h-3.5 w-3.5 rounded-full border-2 transition-all group-hover:scale-125 z-10 shrink-0 mt-1.5",
                                   isActive
-                                    ? "border-fuchsia-400 bg-fuchsia-500 shadow-xs shadow-fuchsia-500/50"
+                                    ? "border-indigo-400 bg-indigo-500"
                                     : isConflict
-                                      ? "border-rose-500 bg-rose-500 animate-pulse"
+                                      ? "border-rose-400 bg-rose-500 animate-pulse"
                                       : "border-slate-300 bg-muted group-hover:border-slate-400",
                                 )}
                               />
@@ -386,7 +386,7 @@ export default function SchedulePage() {
                                     <div className="flex items-center gap-2 mb-1">
                                       {isActive && (
                                         <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded">
-                                          <Radio className="h-3 w-3 animate-pulse text-fuchsia-400" />
+                                          <Radio className="h-3 w-3 animate-pulse text-indigo-400" />
                                           Sedang Berlangsung
                                         </span>
                                       )}
@@ -419,7 +419,7 @@ export default function SchedulePage() {
                                     className={cn(
                                       "text-xs font-mono px-2.5 py-1 rounded-md font-medium border",
                                       isActive
-                                        ? "bg-fuchsia-600 border-fuchsia-500 text-white shadow-xs shadow-fuchsia-500/30"
+                                        ? "bg-indigo-600 border-indigo-500 text-white"
                                         : isConflict
                                           ? "bg-rose-600 border-rose-500 text-white"
                                           : "text-muted-foreground",

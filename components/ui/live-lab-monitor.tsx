@@ -91,7 +91,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                 key={room}
                 className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
                   activeSchedule
-                    ? "border-fuchsia-500/50 bg-fuchsia-950/30 shadow-md shadow-fuchsia-950/20 ring-1 ring-fuchsia-500/30"
+                    ? "border-indigo-500/50 ring-1 ring-indigo-500/30"
                     : " hover:border-slate-300"
                 }`}
               >
@@ -108,9 +108,9 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                     {activeSchedule ? (
                       <Badge
                         variant="outline"
-                        className="bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30 text-[10px] font-medium gap-1 py-0.5"
+                        className="text-[10px] font-medium border-indigo-400"
                       >
-                        <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 animate-pulse" />
+                        <span className="h-1.5 w-1.5 text-indigo-500 rounded-full bg-indigo-500 animate-ping" />
                         Sedang Digunakan
                       </Badge>
                     ) : (
@@ -126,7 +126,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
                   {/* Konten Detail Kelas */}
                   {activeSchedule ? (
-                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg bg-black/40 border">
+                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg border">
                       <p className="text-xs font-semibold line-clamp-1">
                         {activeSchedule.course_name}
                       </p>
