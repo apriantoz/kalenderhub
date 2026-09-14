@@ -55,6 +55,8 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { LAB_ROOMS } from "@/lib/room-constants";
+import { PRODI } from "@/lib/prodi-constants";
 
 export default function SchedulePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -119,19 +121,9 @@ export default function SchedulePage() {
   }, []);
 
   // Opsi Dropdown Dinamis dari data yang ada
-  const prodiOptions = useMemo(() => {
-    const list = Array.from(
-      new Set(schedules.map((s) => s.prodi).filter(Boolean)),
-    );
-    return list.sort();
-  }, [schedules]);
+  const prodiOptions = PRODI;
 
-  const roomOptions = useMemo(() => {
-    const list = Array.from(
-      new Set(schedules.map((s) => s.room).filter(Boolean)),
-    );
-    return list.sort();
-  }, [schedules]);
+  const roomOptions = LAB_ROOMS;
 
   // Data Jadwal Terfilter
   const filteredSchedules = useMemo(() => {

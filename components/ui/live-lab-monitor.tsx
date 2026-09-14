@@ -87,13 +87,13 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
             Belum ada data ruangan atau jadwal terdaftar.
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
             {roomStatuses.map(({ room, activeSchedule, upcomingSchedule, totalToday }) => (
               <div
                 key={room}
                 className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
                   activeSchedule
-                    ? "border-indigo-500/50 ring-1 ring-indigo-500/30"
+                    ? "border-indigo-500/50 bg-indigo-50 ring-1 ring-indigo-500/30"
                     : " hover:border-slate-300"
                 }`}
               >
