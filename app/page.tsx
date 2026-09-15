@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Trash2,
-  Loader2,
   LogIn,
   LogOut,
   AlertTriangle,
@@ -45,6 +44,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -71,6 +80,9 @@ export default function SchedulePage() {
   // State Filter
   const [selectedProdi, setSelectedProdi] = useState<string>("");
   const [selectedRoom, setSelectedRoom] = useState<string>("");
+
+  // State Delete Dialog Konfirmasi shadcn/ui
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; courseName: string } | null>(null);
 
   const router = useRouter();
   const todayName = getCurrentDayName();
@@ -148,10 +160,17 @@ export default function SchedulePage() {
     router.refresh();
   };
 
-  const handleDelete = async (id: string, courseName: string) => {
-    if (!confirm(`Yakin mau hapus jadwal "${courseName}", bosku?`)) return;
-    const { error } = await supabase.from("schedules").delete().eq("id", id);
-    if (!error) reloadSchedules();
+  const handleDeleteClick = (id: string, courseName: string) => {
+    setDeleteTarget({ id, courseName });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("schedules").delete().eq("id", deleteTarget.id);
+    if (!error) {
+      reloadSchedules();
+    }
+    setDeleteTarget(null);
   };
 
   const handleResetFilter = () => {
@@ -299,7 +318,7 @@ export default function SchedulePage() {
       {/* Timeline Layout per Hari */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-            <Spinner className="size-10" />
+          <Spinner className="size-10" />
         </div>
       ) : (
         <div className="space-y-6">
@@ -453,7 +472,7 @@ export default function SchedulePage() {
                                         <DropdownMenuItem
                                           variant="destructive"
                                           onClick={() =>
-                                            handleDelete(
+                                            handleDeleteClick(
                                               item.id,
                                               item.course_name,
                                             )
@@ -480,13 +499,41 @@ export default function SchedulePage() {
           })}
         </div>
       )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
         {!loading && <ScheduleChart schedules={filteredSchedules} />}
-        {!loading && <RoomUsageChart schedules={schedules} />}{" "}
+        {!loading && <RoomUsageChart schedules={schedules} />}
       </div>
+
       {/* Komponen Monitor Lab Real-Time di Bagian Bawah */}
       {!loading && <LiveLabMonitor schedules={schedules} />}
+      
       <FooterHub />
+
+      {/* Shadcn UI Alert Dialog untuk Konfirmasi Hapus */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent >
+          <AlertDialogHeader>
+            <AlertDialogTitle>Yakin ingin menghapus jadwal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini akan menghapus jadwal perkuliahan{" "}
+              <span className="font-semibold text-foreground">
+                &ldquo;{deleteTarget?.courseName}&rdquo;
+              </span>{" "}
+              secara permanen dari sistem.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className=" bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              Ya, Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

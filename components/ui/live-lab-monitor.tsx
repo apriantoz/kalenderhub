@@ -128,7 +128,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
                   {/* Konten Detail Kelas */}
                   {activeSchedule ? (
-                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg border border-indigo-500/30">
+                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg">
                       <p className="text-xs font-semibold line-clamp-1">
                         {activeSchedule.course_name}
                       </p>
@@ -140,9 +140,9 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                       </div>
                     </div>
                   ) : upcomingSchedule ? (
-                    <div className="space-y-1 my-2 p-2.5 rounded-lg border">
+                    <div className="space-y-1 my-2 p-2.5 rounded-lg bg-amber-900/50">
                       <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80 font-medium">
-                        <AlertCircle className="h-3 w-3 text-amber-400" />
+                        <AlertCircle className="h-3 w-3 text-amber-400 animate-ping" />
                         <span>Kelas Berikutnya:</span>
                       </div>
                       <p className="text-xs font-medium line-clamp-1">

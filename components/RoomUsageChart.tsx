@@ -51,7 +51,7 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
   }, [chartData]);
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -69,7 +69,7 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
       </CardHeader>
 
       <CardContent>
-        <ChartContainer config={chartConfig} className="max-h-[250px] w-full">
+        <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
             data={chartData}

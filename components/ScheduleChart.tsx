@@ -49,7 +49,7 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
   }, [schedules]);
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -67,7 +67,7 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
       </CardHeader>
 
       <CardContent>
-        <ChartContainer config={chartConfig} className="max-h-[220px] w-full">
+        <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
             data={chartData}

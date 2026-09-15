@@ -9,7 +9,7 @@ export interface Schedule {
   end_time: string;
 }
 
-export const DAYS_OF_WEEK = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+export const DAYS_OF_WEEK = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
 
 /**
  * Mendapatkan nama hari ini dalam Bahasa Indonesia
