@@ -60,6 +60,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScheduleChart } from "@/components/ScheduleChart";
 import { RoomUsageChart } from "@/components/RoomUsageChart";
 import { FooterHub } from "@/components/FooterHub";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function SchedulePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -298,7 +299,7 @@ export default function SchedulePage() {
       {/* Timeline Layout per Hari */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-7 w-7 animate-spin" />
+            <Spinner className="size-10" />
         </div>
       ) : (
         <div className="space-y-6">
@@ -480,12 +481,12 @@ export default function SchedulePage() {
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
-        <ScheduleChart schedules={filteredSchedules} />
-        <RoomUsageChart schedules={schedules} />
+        {!loading && <ScheduleChart schedules={filteredSchedules} />}
+        {!loading && <RoomUsageChart schedules={schedules} />}{" "}
       </div>
       {/* Komponen Monitor Lab Real-Time di Bagian Bawah */}
       {!loading && <LiveLabMonitor schedules={schedules} />}
-      <FooterHub/>
+      <FooterHub />
     </div>
   );
 }
