@@ -99,7 +99,8 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
             />
             <Bar
               dataKey="usage"
-              fill="var(--color-usage)"
+              fill="oklch(35.9% 0.144 278.697)"
+              fillOpacity={0.3}
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

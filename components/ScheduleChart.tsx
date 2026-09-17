@@ -99,9 +99,9 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
             <Area
               dataKey="total"
               type="natural"
-              fill="var(--color-total)"
+              fill="oklch(35.9% 0.144 278.697)"
               fillOpacity={0.3}
-              stroke="var(--color-total)"
+              stroke="oklch(35.9% 0.144 278.697)"
               strokeWidth={2}
             />
           </AreaChart>
