@@ -24,7 +24,7 @@ import { RoomUsageChart } from "@/components/RoomUsageChart";
 import { FooterHub } from "@/components/FooterHub";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar1Icon, ChartBarIncreasingIcon, InfoIcon, MonitorIcon, TrendingUpIcon } from "lucide-react";
+import { Calendar1Icon, InfoIcon, TrendingUpIcon } from "lucide-react";
 
 export default function ScheduleMain() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
