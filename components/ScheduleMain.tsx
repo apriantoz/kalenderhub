@@ -24,6 +24,7 @@ import { RoomUsageChart } from "@/components/RoomUsageChart";
 import { FooterHub } from "@/components/FooterHub";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar1Icon, ChartBarIncreasingIcon, InfoIcon, MonitorIcon, TrendingUpIcon } from "lucide-react";
 
 export default function ScheduleMain() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -142,15 +143,15 @@ export default function ScheduleMain() {
         onLogout={handleLogout}
       />
 
-      <Tabs defaultValue="monitor" className="w-full">
-        <TabsList variant="line" className="w-full justify-start">
-          <TabsTrigger value="monitor">Monitor</TabsTrigger>
-          <TabsTrigger value="statistik">Statistik</TabsTrigger>
-          <TabsTrigger value="jadwal">Jadwal</TabsTrigger>
+      <Tabs defaultValue="monitor">
+        <TabsList variant="line">
+          <TabsTrigger value="monitor"><InfoIcon/>Status</TabsTrigger>
+          <TabsTrigger value="statistik"><TrendingUpIcon/>Statistik</TabsTrigger>
+          <TabsTrigger value="jadwal"><Calendar1Icon/>Jadwal</TabsTrigger>
         </TabsList>
-        
+
         {/* Tab Monitor */}
-        <TabsContent value="monitor" className="w-full space-y-6 mt-4 focus-visible:outline-none">
+        <TabsContent value="monitor" className="my-4">
           {loading ? (
             <div className="flex items-center justify-center py-16 w-full">
               <Spinner className="size-10" />
@@ -161,13 +162,13 @@ export default function ScheduleMain() {
         </TabsContent>
 
         {/* Tab Statistik */}
-        <TabsContent value="statistik" className="w-full space-y-6 mt-4 focus-visible:outline-none">
+        <TabsContent value="statistik" className="my-4">
           {loading ? (
             <div className="flex items-center justify-center py-16 w-full">
               <Spinner className="size-10" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <ScheduleChart schedules={filteredSchedules} />
               <RoomUsageChart schedules={schedules} />
             </div>
@@ -175,32 +176,31 @@ export default function ScheduleMain() {
         </TabsContent>
 
         {/* Tab Jadwal */}
-        {/* Tab Jadwal */}
-<TabsContent value="jadwal" className="w-full space-y-6 mt-4 focus-visible:outline-none data-[state=inactive]:hidden">
-  {loading ? (
-    <ScheduleSkeleton />
-  ) : (
-    <div className="w-full space-y-6">
-      {/* 2. Komponen Bar Filter & Export */}
-      <ScheduleFilterBar
-        selectedProdi={selectedProdi}
-        selectedRoom={selectedRoom}
-        onProdiChange={setSelectedProdi}
-        onRoomChange={setSelectedRoom}
-        onResetFilter={handleResetFilter}
-        filteredSchedules={filteredSchedules}
-      />
-      {/* 3. Komponen Timeline Layout per Hari */}
-      <ScheduleTimeline
-        filteredSchedules={filteredSchedules}
-        conflictingIds={conflictingIds}
-        isAdmin={isAdmin}
-        onReloadSchedules={reloadSchedules}
-        onDeleteClick={handleDeleteClick}
-      />
-    </div>
-  )}
-</TabsContent>
+        <TabsContent value="jadwal">
+          {loading ? (
+            <ScheduleSkeleton />
+          ) : (
+            <div className="w-full my-4 space-y-4">
+              {/* 2. Komponen Bar Filter & Export */}
+              <ScheduleFilterBar
+                selectedProdi={selectedProdi}
+                selectedRoom={selectedRoom}
+                onProdiChange={setSelectedProdi}
+                onRoomChange={setSelectedRoom}
+                onResetFilter={handleResetFilter}
+                filteredSchedules={filteredSchedules}
+              />
+              {/* 3. Komponen Timeline Layout per Hari */}
+              <ScheduleTimeline
+                filteredSchedules={filteredSchedules}
+                conflictingIds={conflictingIds}
+                isAdmin={isAdmin}
+                onReloadSchedules={reloadSchedules}
+                onDeleteClick={handleDeleteClick}
+              />
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
 
       <FooterHub />
