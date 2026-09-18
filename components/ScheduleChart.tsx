@@ -100,7 +100,7 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
               dataKey="total"
               type="natural"
               fill="oklch(35.9% 0.144 278.697)"
-              fillOpacity={0.3}
+              fillOpacity={0.4}
               stroke="oklch(35.9% 0.144 278.697)"
               strokeWidth={2}
             />

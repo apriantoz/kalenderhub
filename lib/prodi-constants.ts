@@ -1,1 +1,1 @@
-export const PRODI =["Arsitektur","Animasi","DKV","Bisnis Digital","Desain Interior","Fotografi", "Produksi Film dan Televisi"] as const
+export const PRODI =["Arsitektur","Animasi","DKV","Bisnis Digital","Desain Interior","Fotografi", "Produksi Film dan Televisi","Magang Internasional"] as const
