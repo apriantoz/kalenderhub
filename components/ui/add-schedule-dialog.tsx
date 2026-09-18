@@ -32,6 +32,14 @@ import { LAB_ROOMS } from "@/lib/room-constants";
 import { PRODI } from "@/lib/prodi-constants";
 import { SEMESTERS } from "@/lib/semester-constants"; // <-- Import dari file konstan
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "./combobox";
 
 interface AddScheduleDialogProps {
   onSuccess: () => void;
@@ -141,42 +149,46 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="prodi">Program Studi</Label>
-              <Select
+              <Combobox
+                items={PRODI}
                 value={prodi}
                 onValueChange={(val) => setProdi(val ?? PRODI[0])}
               >
-                <SelectTrigger id="prodi" className="w-full">
-                  <SelectValue placeholder="Pilih Prodi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODI.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      Prodi {r}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <ComboboxInput placeholder="Pilih Prodi" />
+                <ComboboxContent>
+                  <ComboboxEmpty>Prodi tidak ditemukan</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem key={item} value={item}>
+                        {item}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="semester">Semester</Label>
-              <Select
+              <Combobox
+                items={SEMESTERS}
                 value={semester}
                 onValueChange={(val) =>
                   setSemester(val ?? String(SEMESTERS[0]))
                 }
               >
-                <SelectTrigger id="semester" className="w-full">
-                  <SelectValue placeholder="Pilih Semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SEMESTERS.map((sem) => (
-                    <SelectItem key={sem} value={String(sem)}>
-                      Semester {sem}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <ComboboxInput placeholder="Semester" />
+                <ComboboxContent>
+                  <ComboboxEmpty>Semester tidak sesuai</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem key={item} value={item}>
+                        {item}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
           </div>
 
