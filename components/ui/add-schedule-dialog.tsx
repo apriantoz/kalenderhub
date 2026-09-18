@@ -52,8 +52,8 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const [courseName, setCourseName] = useState("");
-  const [prodi, setProdi] = useState<string>(PRODI[0]);
-  const [semester, setSemester] = useState<string>(String(SEMESTERS[0]));
+  const [prodi, setProdi] = useState<string>("");
+  const [semester, setSemester] = useState<string>(String(""));
   const [day, setDay] = useState(DAYS_OF_WEEK[0]);
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("10:00");
@@ -89,8 +89,8 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
     } else {
       setSuccessMsg("Jadwal berhasil ditambahkan!");
       setCourseName("");
-      setProdi(PRODI[0]);
-      setSemester(String(SEMESTERS[0]));
+      setProdi("");
+      setSemester(String(""));
 
       setTimeout(() => {
         setOpen(false);
@@ -152,7 +152,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
               <Combobox
                 items={PRODI}
                 value={prodi}
-                onValueChange={(val) => setProdi(val ?? PRODI[0])}
+                onValueChange={(val) => setProdi(val ?? "")}
               >
                 <ComboboxInput placeholder="Pilih Prodi" />
                 <ComboboxContent>
@@ -174,7 +174,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
                 items={SEMESTERS}
                 value={semester}
                 onValueChange={(val) =>
-                  setSemester(val ?? String(SEMESTERS[0]))
+                  setSemester(val ?? String(""))
                 }
               >
                 <ComboboxInput placeholder="Semester" />

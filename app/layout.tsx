@@ -18,10 +18,9 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${geist.className} h-full dark antialiased`}
+      className={`${geist.className} h-full dark antialiased scrollbar-gutter-stable`}
     >
       <body className="min-h-full flex flex-col bg-fixed">
-        {" "}
         {children}
         <Toaster />
       </body>
