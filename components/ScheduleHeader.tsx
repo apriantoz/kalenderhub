@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddScheduleDialog } from "@/components/ui/add-schedule-dialog";
 import { LogIn, LogOut } from "lucide-react";
-import { AdminMessageDialog } from "./AdminMessageDialog";
+import { AdminMessageDialog } from "./AdminMessage";
 
 interface ScheduleHeaderProps {
   isAdmin: boolean;
