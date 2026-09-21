@@ -25,6 +25,7 @@ export function AdminMessageDialog() {
   const [senderName, setSenderName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [messageText, setMessageText] = useState("");
+  const [wa, setWA]=useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,6 +69,7 @@ export function AdminMessageDialog() {
         setMessageText("");
         setSenderName("");
         setRoomName("");
+        setWA("");
         setTurnstileToken(null);
         setErrorMessage("");
         setIsOpen(false);
@@ -140,8 +142,17 @@ export function AdminMessageDialog() {
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
                 disabled={isSubmitting}
-                className="bg-background/50 border-border/50 h-9 text-sm"
+                className="text-sm"
               />
+            </Field>
+            <Field className="grid gap-2">
+              <Label htmlFor="wa" className="text-xs text-muted-foreground">
+                No. WhatsAPP untuk konfirmasi
+              </Label>
+              <Input id="wa" placeholder="08123456789"
+              value={wa}
+              onChange={(e)=>setWA(e.target.value)}
+              disabled={isSubmitting}/>
             </Field>
 
             <Field className="grid gap-2">
@@ -154,7 +165,7 @@ export function AdminMessageDialog() {
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
                 disabled={isSubmitting}
-                className="bg-background/50 border-border/50 h-9 text-sm"
+                className="text-sm"
               />
             </Field>
 
@@ -168,7 +179,7 @@ export function AdminMessageDialog() {
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 disabled={isSubmitting}
-                className="min-h-[100px] bg-background/50 border-border/50 resize-none text-sm"
+                className="min-h-[100px] resize-none text-sm"
               />
             </Field>
 

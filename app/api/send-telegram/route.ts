@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { name, room, message, token: turnstileToken } = await req.json();
+    const { name,wa, room, message, token: turnstileToken } = await req.json();
 
     // 1. Validasi keberadaan token Turnstile dari frontend
     if (!turnstileToken) {
@@ -52,6 +52,7 @@ export async function POST(req: Request) {
     const textPayload = 
       `🚨 *LAPORAN KENDALA LAB*\n\n` +
       `👤 *Pengirim:* ${name || "Anonim"}\n` +
+      `WA *WA:* ${wa}\n` +
       `📍 *Lab/Ruangan:* ${room || "Umum"}\n` +
       `💬 *Pesan:* ${message}\n\n` +
       `🕒 _Waktu: ${new Date().toLocaleString("id-ID")}_`;
