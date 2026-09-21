@@ -49,10 +49,14 @@ export async function POST(req: Request) {
     }
 
     // 4. Format pesan ala Markdown Telegram
+    // Bersihkan angka 0 atau 62 di awal jika user terlanjur mengetiknya
+    const cleanWA = wa ? wa.replace(/^0+/, "").replace(/^62+/, "") : "";
+
+    // Format pesan ala Markdown Telegram dengan Clickable WhatsApp Link
     const textPayload = 
       `🚨 *LAPORAN KENDALA LAB*\n\n` +
       `👤 *Pengirim:* ${name || "Anonim"}\n` +
-      `WA *WA:* https://wa/me/62${wa}\n` +
+      `${cleanWA ? `📱 *WhatsApp:* wa.me/62${cleanWA}\n` : ""}` +
       `📍 *Lab/Ruangan:* ${room || "Umum"}\n` +
       `💬 *Pesan:* ${message}\n\n` +
       `🕒 _Waktu: ${new Date().toLocaleString("id-ID")}_`;
