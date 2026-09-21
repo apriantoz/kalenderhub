@@ -12,28 +12,41 @@ export interface Schedule {
 export const DAYS_OF_WEEK = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
 
 /**
- * Mendapatkan nama hari ini dalam Bahasa Indonesia
+ * Mendapatkan nama hari ini dalam Bahasa Indonesia (Hanya Senin - Jumat)
  */
 export function getCurrentDayName(): string {
-  const dayIndex = new Date().getDay(); // 0 = Minggu, 1 = Senin, dst.
-  const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+  const dayIndex = new Date().getDay(); // 0 = Minggu, 1 = Senin, ..., 5 = Jumat, 6 = Sabtu
+  
+  // 2. UBAH DI SINI: Jika hari ini Sabtu (6) atau Minggu (0), kembalikan string kosong atau handle khusus
+  if (dayIndex === 0 || dayIndex === 6) {
+    return 'Libur'; // Anda bisa ganti jadi string lain atau biarkan 'Libur' agar tidak match dengan jadwal mana pun
+  }
+  
+  // Karena dayIndex 1-5 (Senin-Jumat), kurangi 1 agar pas dengan index array 0-4
+  const mappedIndex = dayIndex - 1;
   return DAYS_OF_WEEK[mappedIndex] || 'Senin';
 }
 
 /**
  * Memeriksa apakah jadwal sedang berlangsung detik ini
  */
-export function isSessionActive(day: string, startTime: string, endTime: string): boolean {
+export function isSessionActive(day: string, startTime?: string, endTime?: string): boolean {
   if (!startTime || !endTime) return false;
 
   const today = getCurrentDayName();
+  
+  // Jika hari ini Sabtu/Minggu (kembalikan 'Libur'), otomatis langsung return false di sini
   if (day.trim().toLowerCase() !== today.toLowerCase()) return false;
 
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const [startH, startM] = startTime.split(':').map(Number);
-  const [endH, endM] = endTime.split(':').map(Number);
+  // Bersihkan format HH:mm:ss menjadi HH:mm
+  const cleanStart = startTime.split(':').slice(0, 2).join(':');
+  const cleanEnd = endTime.split(':').slice(0, 2).join(':');
+
+  const [startH, startM] = cleanStart.split(':').map(Number);
+  const [endH, endM] = cleanEnd.split(':').map(Number);
 
   const startMinutes = startH * 60 + startM;
   const endMinutes = endH * 60 + endM;
