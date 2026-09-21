@@ -107,8 +107,6 @@ export function AdminMessageDialog() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 border-border/40 hover:bg-accent/50"
-            type="button"
           >
             <MessageSquarePlus className="w-4 h-4 text-primary" />
             Lapor / Hubungi Admin
@@ -151,15 +149,19 @@ export function AdminMessageDialog() {
             <Field className="grid gap-2">
               <Label htmlFor="wa" className="text-xs text-muted-foreground">
                 No. WhatsAPP untuk konfirmasi
+                              <span className="text-destructive">*</span>
               </Label>
               <InputGroup>
                 <InputGroupAddon align="inline-start">+62</InputGroupAddon>
                 <InputGroupInput
                   id="wa"
                   placeholder="8123456789"
+                  type="number"
+                  className="text"
                   value={senderWA}
                   onChange={(e) => setSenderWA(e.target.value)}
                   disabled={isSubmitting}
+                  required
                 />
               </InputGroup>
             </Field>
@@ -217,7 +219,7 @@ export function AdminMessageDialog() {
             <Button
               type="submit"
               disabled={isSubmitting || !messageText.trim() || !turnstileToken}
-              className="gap-2"
+              className="gap-2 w-full"
             >
               <Send className="w-4 h-4" />
               {isSubmitting ? "Mengirim..." : "Kirim Laporan"}
