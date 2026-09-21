@@ -87,7 +87,6 @@ export default function ScheduleMain() {
       setIsAdmin(!!session);
     });
 
-    // Supabase Realtime Listener agar sinkron otomatis
     const channel = supabase
       .channel("public-schedules")
       .on(
@@ -115,7 +114,6 @@ export default function ScheduleMain() {
     });
   }, [schedules, selectedProdi, selectedRoom]);
 
-  // Deteksi bentrok tetap dihitung dari seluruh data jadwal
   const conflictingIds = useMemo(() => {
     return getConflictingScheduleIds(schedules);
   }, [schedules]);
@@ -200,13 +198,14 @@ export default function ScheduleMain() {
           )}
         </TabsContent>
 
-        {/* Tab Jadwal */}
+        {/* Tab Jadwal dengan ScheduleSkeleton */}
         <TabsContent value="jadwal">
           {loading ? (
-            <ScheduleSkeleton />
+            <div className="my-4">
+              <ScheduleSkeleton />
+            </div>
           ) : (
             <div className="w-full my-4 space-y-4">
-              {/* 2. Komponen Bar Filter & Export */}
               <ScheduleFilterBar
                 selectedProdi={selectedProdi}
                 selectedRoom={selectedRoom}
@@ -215,7 +214,6 @@ export default function ScheduleMain() {
                 onResetFilter={handleResetFilter}
                 filteredSchedules={filteredSchedules}
               />
-              {/* 3. Komponen Timeline Layout per Hari */}
               <ScheduleTimeline
                 filteredSchedules={filteredSchedules}
                 conflictingIds={conflictingIds}
@@ -230,7 +228,7 @@ export default function ScheduleMain() {
 
       <FooterHub />
 
-      {/* Shadcn UI Alert Dialog untuk Konfirmasi Hapus */}
+      {/* Dialog Konfirmasi Hapus */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
