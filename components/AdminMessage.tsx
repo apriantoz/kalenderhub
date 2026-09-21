@@ -150,7 +150,7 @@ export function AdminMessageDialog() {
               </Label>
               <Input
                 id="room"
-                placeholder="Contoh: Lab Komputer 03"
+                placeholder="Contoh: Ruang 1A"
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
                 disabled={isSubmitting}
@@ -164,7 +164,7 @@ export function AdminMessageDialog() {
               </Label>
               <Textarea
                 id="message"
-                placeholder="Tuliskan kendala fasilitas (misal: Proyektor mati, AC kurang dingin)..."
+                placeholder="Tuliskan kendala fasilitas (misal: TV mati, AC kurang dingin)..."
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 disabled={isSubmitting}
