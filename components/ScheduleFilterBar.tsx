@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/card";
 import { LAB_ROOMS } from "@/lib/room-constants";
 import { PRODI } from "@/lib/prodi-constants";
-import { Schedule } from "@/lib/schedule-utils";
+import { Schedule } from "@/lib/schedule";
 
 interface ScheduleFilterBarProps {
   selectedProdi: string;
