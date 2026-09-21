@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Schedule } from '@/lib/schedule-utils';
+import { Schedule } from '@/lib/schedule';
 
 // Helper: Mapping urutan hari agar sorting-nya sesuai (bukan abjad)
 const dayOrder: { [key: string]: number } = {
@@ -15,21 +15,25 @@ const dayOrder: { [key: string]: number } = {
   'Minggu': 7,
 };
 
-// Fungsi Universal untuk Sorting Schedule
+// Fungsi Universal untuk Sorting Schedule (Aman dari undefined)
 const sortScheduleData = (data: Schedule[]): Schedule[] => {
   return [...data].sort((a, b) => {
     // 1. Urutkan berdasarkan Hari
-    const dayA = dayOrder[a.day] || 99;
-    const dayB = dayOrder[b.day] || 99;
+    const dayA = dayOrder[a.day || ''] || 99;
+    const dayB = dayOrder[b.day || ''] || 99;
     if (dayA !== dayB) return dayA - dayB;
 
     // 2. Jika hari sama, urutkan berdasarkan Jam Mulai (start_time)
-    if (a.start_time !== b.start_time) {
-      return a.start_time.localeCompare(b.start_time);
+    const timeA = a.start_time || '';
+    const timeB = b.start_time || '';
+    if (timeA !== timeB) {
+      return timeA.localeCompare(timeB);
     }
 
     // 3. Jika jam sama, urutkan berdasarkan Ruangan
-    return a.room.localeCompare(b.room);
+    const roomA = a.room || '';
+    const roomB = b.room || '';
+    return roomA.localeCompare(roomB);
   });
 };
 
@@ -43,10 +47,8 @@ export const exportToExcel = async (
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Jadwal Lab');
 
-  // Sort data terlebih dahulu sebelum dimasukkan ke Excel
   const sortedData = sortScheduleData(data);
 
-  // Definisi Kolom & Lebar
   worksheet.columns = [
     { header: 'No', key: 'no', width: 6 },
     { header: 'Hari', key: 'day', width: 12 },
@@ -56,7 +58,6 @@ export const exportToExcel = async (
     { header: 'Program Studi', key: 'prodi', width: 28 },
   ];
 
-  // Styling Header (Warna Slate 800 & Teks Bold Putih)
   const headerRow = worksheet.getRow(1);
   headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
   headerRow.fill = {
@@ -66,23 +67,20 @@ export const exportToExcel = async (
   };
   headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-  // Menambahkan Data Ke Baris Excel (Menggunakan sortedData)
   sortedData.forEach((item, index) => {
     worksheet.addRow({
       no: index + 1,
-      day: item.day,
-      time: `${item.start_time} - ${item.end_time}`,
-      room: item.room,
-      course_name: item.course_name,
-      prodi: item.prodi,
+      day: item.day || '-',
+      time: `${item.start_time || ''} - ${item.end_time || ''}`,
+      room: item.room || '-',
+      course_name: item.course_name || '-',
+      prodi: item.prodi || '-',
     });
   });
 
-  // Alignment Tengah untuk Kolom No & Jam
   worksheet.getColumn('no').alignment = { horizontal: 'center' };
   worksheet.getColumn('time').alignment = { horizontal: 'center' };
 
-  // Generate File & Trigger Download
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), fileName);
 };
@@ -96,10 +94,8 @@ export const exportToPDF = (
 ): void => {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-  // Sort data terlebih dahulu sebelum dimasukkan ke PDF
   const sortedData = sortScheduleData(data);
 
-  // Header Judul & Tanggal Cetak
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('REKAPITULASI JADWAL LABORATORIUM KOMPUTER', 14, 15);
@@ -118,18 +114,18 @@ export const exportToPDF = (
     21
   );
 
-  // Data Tabel (Menggunakan sortedData)
   const tableColumn = ['No', 'Hari', 'Jam', 'Ruangan', 'Mata Kuliah', 'Program Studi'];
+  
+  // Memastikan tipe data bersih dari undefined (diberi fallback string kosong)
   const tableRows = sortedData.map((item, index) => [
     index + 1,
-    item.day,
-    `${item.start_time} - ${item.end_time}`,
-    item.room,
-    item.course_name,
-    item.prodi,
+    item.day || '-',
+    `${item.start_time || ''} - ${item.end_time || ''}`,
+    item.room || '-',
+    item.course_name || '-',
+    item.prodi || '-',
   ]);
 
-  // Generate Tabel PDF
   autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
