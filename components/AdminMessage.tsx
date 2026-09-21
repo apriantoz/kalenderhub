@@ -104,10 +104,7 @@ export function AdminMessageDialog() {
     >
       <DialogTrigger
         render={
-          <Button
-            variant="outline"
-            size="sm"
-          >
+          <Button variant="outline" size="sm">
             <MessageSquarePlus className="w-4 h-4 text-primary" />
             Lapor / Hubungi Admin
           </Button>
@@ -149,17 +146,21 @@ export function AdminMessageDialog() {
             <Field className="grid gap-2">
               <Label htmlFor="wa" className="text-xs text-muted-foreground">
                 No. WhatsAPP untuk konfirmasi
-                              <span className="text-destructive">*</span>
+                <span className="text-destructive">*</span>
               </Label>
               <InputGroup>
                 <InputGroupAddon align="inline-start">+62</InputGroupAddon>
                 <InputGroupInput
                   id="wa"
                   placeholder="8123456789"
-                  type="number"
-                  className="text"
+                  type="tel"
+                  className="text-sm"
                   value={senderWA}
-                  onChange={(e) => setSenderWA(e.target.value)}
+                  onChange={(e) => {
+                    // Hanya izinkan karakter angka (0-9) yang masuk ke state
+                    const numericValue = e.target.value.replace(/\D/g, "");
+                    setSenderWA(numericValue);
+                  }}
                   disabled={isSubmitting}
                   required
                 />
