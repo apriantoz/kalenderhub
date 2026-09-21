@@ -19,13 +19,14 @@ import { FieldGroup, Field } from "@/components/ui/field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/components/ui/toast";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 
 export function AdminMessageDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [senderName, setSenderName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [messageText, setMessageText] = useState("");
-  const [wa, setWA]=useState("");
+  const [senderWA, setSenderWA]=useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +54,7 @@ export function AdminMessageDialog() {
         body: JSON.stringify({
           name: senderName.trim() || "Mahasiswa / Dosen",
           room: roomName.trim() || "Gedung Desain Hub",
+          wa:senderWA.trim() || "-",
           message: messageText,
           token: turnstileToken, // Kirim token ke backend untuk divalidasi via siteverify
         }),
@@ -69,7 +71,7 @@ export function AdminMessageDialog() {
         setMessageText("");
         setSenderName("");
         setRoomName("");
-        setWA("");
+        setSenderWA("");
         setTurnstileToken(null);
         setErrorMessage("");
         setIsOpen(false);
@@ -90,8 +92,8 @@ export function AdminMessageDialog() {
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
         if (!open) {
@@ -119,7 +121,8 @@ export function AdminMessageDialog() {
           <DialogHeader>
             <DialogTitle>Kirim Pesan ke Admin Lab</DialogTitle>
             <DialogDescription>
-              Laporkan kendala fasilitas lab atau tanyakan jadwal khusus langsung kepada pengelola Gedung Desain Hub.
+              Laporkan kendala fasilitas lab atau tanyakan jadwal khusus
+              langsung kepada pengelola Gedung Desain Hub.
             </DialogDescription>
           </DialogHeader>
 
@@ -149,10 +152,16 @@ export function AdminMessageDialog() {
               <Label htmlFor="wa" className="text-xs text-muted-foreground">
                 No. WhatsAPP untuk konfirmasi
               </Label>
-              <Input id="wa" placeholder="08123456789"
-              value={wa}
-              onChange={(e)=>setWA(e.target.value)}
-              disabled={isSubmitting}/>
+              <InputGroup>
+                <InputGroupAddon align="inline-start">+62</InputGroupAddon>
+                <InputGroupInput
+                  id="wa"
+                  placeholder="8123456789"
+                  value={senderWA}
+                  onChange={(e) => setSenderWA(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </InputGroup>
             </Field>
 
             <Field className="grid gap-2">
@@ -170,7 +179,10 @@ export function AdminMessageDialog() {
             </Field>
 
             <Field className="grid gap-2">
-              <Label htmlFor="message" className="text-xs text-muted-foreground">
+              <Label
+                htmlFor="message"
+                className="text-xs text-muted-foreground"
+              >
                 Pesan / Kendala <span className="text-destructive">*</span>
               </Label>
               <Textarea
@@ -193,8 +205,10 @@ export function AdminMessageDialog() {
                   setErrorMessage("");
                 }}
                 onExpire={() => setTurnstileToken(null)}
-                onError={() => setErrorMessage("Verifikasi keamanan gagal dimuat.")}
-                options={{theme:"dark"}}
+                onError={() =>
+                  setErrorMessage("Verifikasi keamanan gagal dimuat.")
+                }
+                options={{ theme: "dark" }}
               />
             </div>
           </FieldGroup>

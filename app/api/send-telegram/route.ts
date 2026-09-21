@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     const textPayload = 
       `🚨 *LAPORAN KENDALA LAB*\n\n` +
       `👤 *Pengirim:* ${name || "Anonim"}\n` +
-      `WA *WA:* ${wa}\n` +
+      `WA *WA:* https://wa/me/62${wa}\n` +
       `📍 *Lab/Ruangan:* ${room || "Umum"}\n` +
       `💬 *Pesan:* ${message}\n\n` +
       `🕒 _Waktu: ${new Date().toLocaleString("id-ID")}_`;
