@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Schedule, DAYS_OF_WEEK } from "@/lib/schedule-utils";
+import { Schedule, DAYS_OF_WEEK } from "@/lib/schedule";
 
 interface ScheduleChartProps {
   schedules: Schedule[];

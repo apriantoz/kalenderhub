@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Schedule, getCurrentDayName, isSessionActive } from "@/lib/schedule-utils";
+import { Schedule, getCurrentDayName, isSessionActive } from "@/lib/schedule";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MonitorPlay, Clock, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
@@ -23,8 +23,8 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
 
   // Ambil daftar semua ruangan unik dari database
   const allRooms = useMemo(() => {
-    const dbRooms = schedules.map((s)=>s.room).filter(Boolean);
-    return Array.from(new Set([...LAB_ROOMS,...dbRooms])).sort();
+    const dbRooms = schedules.map((s) => s.room).filter(Boolean);
+    return Array.from(new Set([...LAB_ROOMS, ...dbRooms])).sort();
   }, [schedules]);
 
   // Filter jadwal khusus hari ini
@@ -45,8 +45,8 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
       // Cari jadwal berikutnya hari ini (yang jam mulainya di atas jam sekarang)
       const nowString = currentTime.toTimeString().slice(0, 5);
       const upcomingSchedule = roomSchedules
-        .filter((s) => s.start_time > nowString)
-        .sort((a, b) => a.start_time.localeCompare(b.start_time))[0];
+        .filter((s) => s.start_time && s.start_time > nowString)
+        .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""))[0];
 
       return {
         room,
@@ -130,7 +130,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                   {activeSchedule ? (
                     <div className="space-y-1.5 my-2 p-2.5 rounded-lg">
                       <p className="text-xs font-semibold line-clamp-1">
-                        {activeSchedule.course_name}
+                        {activeSchedule.course_name || activeSchedule.courseName}
                       </p>
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                         <span>{activeSchedule.prodi}</span>
@@ -146,7 +146,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                         <span>Kelas Berikutnya:</span>
                       </div>
                       <p className="text-xs font-medium line-clamp-1">
-                        {upcomingSchedule.course_name} ({upcomingSchedule.prodi})
+                        {upcomingSchedule.course_name || upcomingSchedule.courseName} ({upcomingSchedule.prodi})
                       </p>
                       <p className="text-[11px] font-mono text-muted-foreground/80">
                         Mulai pukul {upcomingSchedule.start_time}

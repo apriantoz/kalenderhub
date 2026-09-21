@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Schedule, DAYS_OF_WEEK } from "@/lib/schedule-utils";
+import { Schedule, DAYS_OF_WEEK } from "@/lib/schedule";
 import { LAB_ROOMS } from "@/lib/room-constants";
 import { PRODI } from "@/lib/prodi-constants";
 import { SEMESTERS } from "@/lib/semester-constants";

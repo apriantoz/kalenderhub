@@ -5,7 +5,7 @@ import {
   getCurrentDayName,
   isSessionActive,
   Schedule,
-} from "@/lib/schedule-utils";
+} from "@/lib/schedule";
 import { EditScheduleDialog } from "@/components/ui/edit-schedule-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -198,7 +198,7 @@ export function ScheduleTimeline({
                                     <DropdownMenuItem
                                       variant="destructive"
                                       onClick={() =>
-                                        onDeleteClick(item.id, item.course_name)
+                                        onDeleteClick(item.id, item.course_name || item.courseName || "")
                                       }
                                       className="cursor-pointer gap-2 py-1.5 text-xs text-rose-400 focus:text-rose-400 focus:bg-rose-950/40"
                                     >

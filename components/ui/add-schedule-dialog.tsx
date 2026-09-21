@@ -27,7 +27,7 @@ import {
   AlertCircleIcon,
   CheckCircle2Icon,
 } from "lucide-react";
-import { DAYS_OF_WEEK } from "@/lib/schedule-utils";
+import { DAYS_OF_WEEK } from "@/lib/schedule";
 import { LAB_ROOMS } from "@/lib/room-constants";
 import { PRODI } from "@/lib/prodi-constants";
 import { SEMESTERS } from "@/lib/semester-constants"; // <-- Import dari file konstan
