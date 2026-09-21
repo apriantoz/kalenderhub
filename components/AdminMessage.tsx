@@ -183,6 +183,7 @@ export function AdminMessageDialog() {
                 }}
                 onExpire={() => setTurnstileToken(null)}
                 onError={() => setErrorMessage("Verifikasi keamanan gagal dimuat.")}
+                options={{theme:"dark"}}
               />
             </div>
           </FieldGroup>
