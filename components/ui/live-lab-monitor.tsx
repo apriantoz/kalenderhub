@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Schedule, getCurrentDayName, isSessionActive } from "@/lib/schedule";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MonitorPlay, Clock, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
+import { MonitorPlay, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { LAB_ROOMS } from "@/lib/room-constants";
 
 interface LiveLabMonitorProps {
@@ -15,34 +15,26 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
   const [currentTime, setCurrentTime] = useState(() => new Date());
   const todayName = getCurrentDayName();
 
-  // Update timer tiap 30 detik agar status real-time akurat
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
 
-  // Ambil daftar semua ruangan unik dari database
   const allRooms = useMemo(() => {
-    const dbRooms = schedules.map((s) => s.room).filter(Boolean);
+    const dbRooms = schedules.map((s) => s.room).filter((r): r is string => Boolean(r));
     return Array.from(new Set([...LAB_ROOMS, ...dbRooms])).sort();
   }, [schedules]);
 
-  // Filter jadwal khusus hari ini
   const todaySchedules = useMemo(() => {
     return schedules.filter((s) => s.day === todayName);
   }, [schedules, todayName]);
 
-  // Petakan status ruangan hari ini secara real-time
   const roomStatuses = useMemo(() => {
     return allRooms.map((room) => {
       const roomSchedules = todaySchedules.filter((s) => s.room === room);
-      
-      // Cari yang sedang aktif sekarang
       const activeSchedule = roomSchedules.find((s) =>
         isSessionActive(s.day, s.start_time, s.end_time)
       );
-
-      // Cari jadwal berikutnya hari ini (yang jam mulainya di atas jam sekarang)
       const nowString = currentTime.toTimeString().slice(0, 5);
       const upcomingSchedule = roomSchedules
         .filter((s) => s.start_time && s.start_time > nowString)
@@ -57,120 +49,125 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
     });
   }, [allRooms, todaySchedules, currentTime]);
 
+  const sortedRooms = useMemo(() => {
+    return [...roomStatuses].sort((a, b) => {
+      if (a.activeSchedule && !b.activeSchedule) return -1;
+      if (!a.activeSchedule && b.activeSchedule) return 1;
+      return (a.room || "").localeCompare(b.room || "");
+    });
+  }, [roomStatuses]);
+
   return (
-    <Card>
-      <CardHeader className="pb-4 border-b rounded-t-xl flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <MonitorPlay className="h-5 w-5 animate-pulse" />
+    <div className="h-full flex flex-col justify-between">
+      <Card className="border-border/60 shadow-sm flex flex-col h-full">
+        <CardHeader className="py-3 px-4 border-b flex flex-row items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-500">
+              <MonitorPlay className="h-4 w-4 animate-pulse" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-bold tracking-tight">
+                Live Status Lab ({todayName})
+              </CardTitle>
+              <CardDescription className="text-[11px] text-muted-foreground leading-none mt-0.5">
+                Pemantauan real-time ketersediaan seluruh ruangan lab komputer.
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-base font-semibold tracking-tight">
-              Monitor Status Ruangan ({todayName})
-            </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground/80 mt-0.5">
-              Pemantauan penggunaan laboratorium komputer secara langsung berdasarkan waktu sistem.
-            </CardDescription>
-          </div>
-        </div>
-        <CardAction>
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1.5 rounded-md border">
-            <Clock className="h-3.5 w-3.5" />
-            <span>{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} WITA</span>
-          </div>
-        </CardAction>
-      </CardHeader>
+          <CardAction>
+            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1 rounded-lg border bg-muted/40">
+              <Clock className="h-3.5 w-3.5 text-indigo-500" />
+              <span>
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Makassar' })} WITA
+              </span>
+            </div>
+          </CardAction>
+        </CardHeader>
 
-      <CardContent className="pt-1">
-        {allRooms.length === 0 ? (
-          <p className="text-xs text-muted-foreground/50 text-center py-6 italic">
-            Belum ada data ruangan atau jadwal terdaftar.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-            {roomStatuses.map(({ room, activeSchedule, upcomingSchedule, totalToday }) => (
-              <div
-                key={room}
-                className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
-                  activeSchedule
-                    ? "border-indigo-500/30 bg-indigo-900/30"
-                    : " hover:border-slate-300"
-                }`}
-              >
-                <div>
-                  {/* Header Ruangan & Badge Status */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded border border-indigo-500/30">
-                        <Building2 className="h-4 w-4 text-indigo-400" />
+        <CardContent className="p-4 flex-1 flex flex-col justify-center">
+          {allRooms.length === 0 ? (
+            <p className="text-xs text-muted-foreground/50 text-center py-6 italic">
+              Belum ada data ruangan atau jadwal terdaftar.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {sortedRooms.map(({ room, activeSchedule, upcomingSchedule, totalToday }) => {
+                return (
+                  <div
+                    key={room}
+                    className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between bg-card ${
+                      activeSchedule
+                        ? "border-indigo-500/40 bg-indigo-500/5 shadow-2xs"
+                        : "border-border/80 hover:border-emerald-500/30"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <div>
+                          <span className="font-extrabold text-sm tracking-tight leading-tight block">Ruang {room}</span>
+                          <span className="text-[10px] text-muted-foreground font-medium">
+                            {totalToday} Sesi Hari Ini
+                          </span>
+                        </div>
+
+                        {activeSchedule ? (
+                          <Badge variant="outline" className="text-[10px] font-semibold border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 gap-1 px-2 py-0.5">
+                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-ping" />
+                            Digunakan
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold gap-1 px-2 py-0.5">
+                            <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                            Tersedia
+                          </Badge>
+                        )}
                       </div>
-                      <span className="font-bold text-sm tracking-tight">Ruang {room}</span>
+
+                      {activeSchedule ? (
+                        <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9px] uppercase font-mono tracking-wider text-indigo-500 font-bold">Sedang Berlangsung</span>
+                            <span className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                              {activeSchedule.start_time} - {activeSchedule.end_time}
+                            </span>
+                          </div>
+                          <p className="text-xs font-bold text-indigo-950 dark:text-indigo-200 line-clamp-1">
+                            {activeSchedule.course_name || activeSchedule.courseName}
+                          </p>
+                          <span className="text-[11px] text-muted-foreground block line-clamp-1">{activeSchedule.prodi}</span>
+                        </div>
+                      ) : upcomingSchedule ? (
+                        <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60 space-y-0.5">
+                          <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                            <AlertCircle className="h-3 w-3" />
+                            <span>Berikutnya ({upcomingSchedule.start_time} WITA):</span>
+                          </div>
+                          <p className="text-xs font-semibold line-clamp-1">
+                            {upcomingSchedule.course_name || upcomingSchedule.courseName}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="py-3 text-center bg-muted/20 rounded-lg border border-dashed border-border/60">
+                          <p className="text-[11px] text-muted-foreground/60 italic">
+                            Tidak ada jadwal tersisa hari ini.
+                          </p>
+                        </div>
+                      )}
                     </div>
 
-                    {activeSchedule ? (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] font-medium border-indigo-500/30"
-                      >
-                        <span className="h-1.5 w-1.5 text-indigo-500 rounded-full bg-indigo-500 animate-ping" />
-                        Sedang Digunakan
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="bg-muted/30 text-muted-foreground text-[10px] font-medium gap-1 py-0.5"
-                      >
-                        <CheckCircle2 className="h-3 w-3 text-muted-foreground/70" />
-                        Tersedia / Kosong
-                      </Badge>
-                    )}
+                    <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>Status Sistem</span>
+                      <span className={`font-semibold font-mono ${activeSchedule ? 'text-indigo-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {activeSchedule ? 'OCCUPIED' : 'READY'}
+                      </span>
+                    </div>
                   </div>
-
-                  {/* Konten Detail Kelas */}
-                  {activeSchedule ? (
-                    <div className="space-y-1.5 my-2 p-2.5 rounded-lg">
-                      <p className="text-xs font-semibold line-clamp-1">
-                        {activeSchedule.course_name || activeSchedule.courseName}
-                      </p>
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span>{activeSchedule.prodi}</span>
-                        <span className="font-mono font-medium">
-                          {activeSchedule.start_time} - {activeSchedule.end_time}
-                        </span>
-                      </div>
-                    </div>
-                  ) : upcomingSchedule ? (
-                    <div className="space-y-1 my-2 p-2.5 rounded-lg bg-amber-900/50">
-                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80 font-medium">
-                        <AlertCircle className="h-3 w-3 text-amber-400 animate-ping" />
-                        <span>Kelas Berikutnya:</span>
-                      </div>
-                      <p className="text-xs font-medium line-clamp-1">
-                        {upcomingSchedule.course_name || upcomingSchedule.courseName} ({upcomingSchedule.prodi})
-                      </p>
-                      <p className="text-[11px] font-mono text-muted-foreground/80">
-                        Mulai pukul {upcomingSchedule.start_time}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground/50 italic py-3 text-center">
-                      Tidak ada kelas lagi hari ini.
-                    </p>
-                  )}
-                </div>
-
-                {/* Footer Kecil */}
-                <div className="mt-3 pt-2.5 border-t flex items-center justify-between text-[11px] text-muted-foreground/80">
-                  <span>Total Sesi Hari Ini:</span>
-                  <span className="font-mono font-semibold">
-                    {totalToday} Sesi
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

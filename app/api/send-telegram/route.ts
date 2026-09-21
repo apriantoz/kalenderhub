@@ -2,8 +2,42 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { name, room, message } = await req.json();
+    const { name, room, message, token: turnstileToken } = await req.json();
 
+    // 1. Validasi keberadaan token Turnstile dari frontend
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Verifikasi keamanan (Turnstile) diperlukan." },
+        { status: 400 }
+      );
+    }
+
+    // 2. Verifikasi token ke server Cloudflare
+    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+    if (secretKey) {
+      const formData = new URLSearchParams();
+      formData.append("secret", secretKey);
+      formData.append("response", turnstileToken);
+
+      const turnstileRes = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const turnstileResult = await turnstileRes.json();
+
+      if (!turnstileResult.success) {
+        return NextResponse.json(
+          { error: "Verifikasi bot gagal. Silakan coba lagi." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. Cek Konfigurasi Bot Telegram
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -14,7 +48,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Format pesan ala Markdown Telegram
+    // 4. Format pesan ala Markdown Telegram
     const textPayload = 
       `🚨 *LAPORAN KENDALA LAB*\n\n` +
       `👤 *Pengirim:* ${name || "Anonim"}\n` +

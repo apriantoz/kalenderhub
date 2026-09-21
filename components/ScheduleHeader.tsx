@@ -30,17 +30,17 @@ export function ScheduleHeader({
           <>
             <AddScheduleDialog onSuccess={onReloadSchedules} />
             <Button
-              className="cursor-pointer"
               variant="outline"
+              size={'sm'}
               onClick={onLogout}
             >
-              <LogOut className="mr-2 h-4 w-4" /> Logout
+              <LogOut className="mr-1.5 h-4 w-4" />Logout
             </Button>
           </>
         ) : (
           <Link href="/login">
-            <Button variant="outline" className="cursor-pointer">
-              <LogIn className="mr-2 h-4 w-4" /> Login
+            <Button variant="outline" size={'sm'}>
+              <LogIn className="mr-1.5 h-4 w-4"/>Login
             </Button>
           </Link>
         )}

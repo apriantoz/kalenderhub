@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   DAYS_OF_WEEK,
   getCurrentDayName,
@@ -48,13 +49,24 @@ export function ScheduleTimeline({
   onReloadSchedules,
   onDeleteClick,
 }: ScheduleTimelineProps) {
-  const todayName = getCurrentDayName();
+  const todayName = getCurrentDayName(false);
+
+  // Mengelompokkan jadwal berdasarkan hari menggunakan useMemo
+  const schedulesByDay = useMemo(() => {
+    const map: Record<string, Schedule[]> = {};
+    DAYS_OF_WEEK.forEach((day) => {
+      map[day] = filteredSchedules.filter(
+        (s) => s.day?.trim().toLowerCase() === day.toLowerCase()
+      );
+    });
+    return map;
+  }, [filteredSchedules]);
 
   return (
     <div className="w-full max-w-full space-y-4 box-border">
       {DAYS_OF_WEEK.map((day) => {
-        const isToday = day === todayName;
-        const daySchedules = filteredSchedules.filter((s) => s.day === day);
+        const isToday = day.toLowerCase() === todayName.toLowerCase();
+        const daySchedules = schedulesByDay[day] || [];
 
         return (
           <Card key={day} className="w-full transition-all duration-200 overflow-hidden">
@@ -87,16 +99,18 @@ export function ScheduleTimeline({
                 <div className="flex flex-col w-full">
                   {daySchedules.map((item, index) => {
                     const isConflict = conflictingIds.has(item.id);
-                    const isActive = isSessionActive(
-                      item.day,
-                      item.start_time,
-                      item.end_time
-                    );
+                    
+                    const startTime = item.start_time || item.startTime;
+                    const endTime = item.end_time || item.endTime;
+                    const courseName = item.course_name || item.courseName || "Tanpa Nama Mata Kuliah";
+                    const roomName = item.room || item.labName || "-";
+
+                    const isActive = isSessionActive(item.day, startTime, endTime);
                     const isLast = index === daySchedules.length - 1;
 
                     return (
                       <div key={item.id} className="flex gap-4 group w-full min-w-0">
-                        {/* Kolom Garis & Dot menyatu */}
+                        {/* Kolom Garis & Dot Timeline */}
                         <div className="relative flex flex-col items-center shrink-0 w-4">
                           <div
                             className={cn(
@@ -120,11 +134,11 @@ export function ScheduleTimeline({
                         <div className="flex-1 pb-6 min-w-0 overflow-hidden">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b w-full min-w-0">
                             
-                            {/* Bagian Kiri: Nama Mata Kuliah & Info Ruang */}
+                            {/* Bagian Kiri: Mata Kuliah & Info Ruang/Prodi */}
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2 min-w-0">
                                 <h4 className="font-medium text-sm leading-snug break-words group-hover:text-slate-700 transition-colors max-w-full">
-                                  {item.course_name}
+                                  {courseName}
                                 </h4>
 
                                 {isActive && (
@@ -149,12 +163,16 @@ export function ScheduleTimeline({
                               </div>
 
                               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground/80">
-                                <span className="font-medium/90">
+                                <span className="font-medium text-muted-foreground">
                                   <Monitor className="h-3 w-3 inline-block mr-1" />
-                                  Ruang {item.room}
+                                  Ruang {roomName}
                                 </span>
-                                <span>&bull;</span>
-                                <span>{item.prodi}</span>
+                                {item.prodi && (
+                                  <>
+                                    <span>&bull;</span>
+                                    <span>{item.prodi}</span>
+                                  </>
+                                )}
                               </div>
                             </div>
 
@@ -170,7 +188,7 @@ export function ScheduleTimeline({
                                       : "text-muted-foreground"
                                 )}
                               >
-                                {item.start_time} - {item.end_time}
+                                {startTime} - {endTime}
                               </span>
 
                               {isAdmin && (
@@ -197,9 +215,7 @@ export function ScheduleTimeline({
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       variant="destructive"
-                                      onClick={() =>
-                                        onDeleteClick(item.id, item.course_name || item.courseName || "")
-                                      }
+                                      onClick={() => onDeleteClick(item.id, courseName)}
                                       className="cursor-pointer gap-2 py-1.5 text-xs text-rose-400 focus:text-rose-400 focus:bg-rose-950/40"
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />

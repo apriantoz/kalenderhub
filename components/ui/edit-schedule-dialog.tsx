@@ -25,6 +25,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pencil, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "./combobox";
 
 interface EditScheduleDialogProps {
   schedule: Schedule;
@@ -40,13 +48,24 @@ export function EditScheduleDialog({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const [courseName, setCourseName] = useState(schedule.course_name);
-  const [prodi, setProdi] = useState(schedule.prodi);
-  const [semester, setSemester] = useState(String(schedule.semester ?? SEMESTERS[0]));
-  const [day, setDay] = useState(schedule.day);
-  const [startTime, setStartTime] = useState(schedule.start_time);
-  const [endTime, setEndTime] = useState(schedule.end_time);
-  const [room, setRoom] = useState(schedule.room);
+  // Inisialisasi state dengan fallback aman (mendukung snake_case & camelCase)
+  const [courseName, setCourseName] = useState(
+    schedule.course_name || schedule.courseName || ""
+  );
+  const [prodi, setProdi] = useState(schedule.prodi || "");
+  const [semester, setSemester] = useState(
+    String(schedule.semester ?? SEMESTERS[0])
+  );
+  const [day, setDay] = useState(schedule.day || DAYS_OF_WEEK[0]);
+  const [startTime, setStartTime] = useState(
+    schedule.start_time || schedule.startTime || "08:00"
+  );
+  const [endTime, setEndTime] = useState(
+    schedule.end_time || schedule.endTime || "10:00"
+  );
+  const [room, setRoom] = useState(
+    schedule.room || schedule.labName || LAB_ROOMS[0]
+  );
 
   const handleUpdate = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -55,6 +74,11 @@ export function EditScheduleDialog({
 
     if (!courseName || !prodi || !room || !semester) {
       setErrorMsg("Semua field wajib diisi, bosku!");
+      return;
+    }
+
+    if (startTime >= endTime) {
+      setErrorMsg("Jam selesai harus lebih besar dari jam mulai, bosku!");
       return;
     }
 
@@ -138,21 +162,23 @@ export function EditScheduleDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="edit_prodi">Program Studi</Label>
-              <Select
+              <Combobox
+                items={PRODI}
                 value={prodi}
-                onValueChange={(val) => setProdi(val ?? PRODI[0])}
+                onValueChange={(val) => setProdi(val ?? "")}
               >
-                <SelectTrigger id="edit_prodi" className="w-full">
-                  <SelectValue placeholder="Pilih Prodi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODI.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      Prodi {r}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <ComboboxInput placeholder="Pilih Prodi" />
+                <ComboboxContent>
+                  <ComboboxEmpty>Prodi tidak ditemukan</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem key={item} value={item}>
+                        {item}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
 
             <div className="space-y-2">

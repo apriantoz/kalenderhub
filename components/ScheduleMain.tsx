@@ -87,9 +87,22 @@ export default function ScheduleMain() {
       setIsAdmin(!!session);
     });
 
+    // Supabase Realtime Listener agar sinkron otomatis
+    const channel = supabase
+      .channel("public-schedules")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "schedules" },
+        () => {
+          reloadSchedules();
+        }
+      )
+      .subscribe();
+
     return () => {
       ignore = true;
       subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -113,8 +126,11 @@ export default function ScheduleMain() {
     router.refresh();
   };
 
-  const handleDeleteClick = (id: string, courseName: string) => {
-    setDeleteTarget({ id, courseName });
+  const handleDeleteClick = (id: string, courseName?: string) => {
+    const targetItem = schedules.find((s) => s.id === id);
+    const resolvedName =
+      courseName || targetItem?.course_name || targetItem?.courseName || "Jadwal";
+    setDeleteTarget({ id, courseName: resolvedName });
   };
 
   const confirmDelete = async () => {
@@ -145,9 +161,18 @@ export default function ScheduleMain() {
 
       <Tabs defaultValue="monitor">
         <TabsList variant="line">
-          <TabsTrigger value="monitor"><InfoIcon/>Status</TabsTrigger>
-          <TabsTrigger value="statistik"><TrendingUpIcon/>Statistik</TabsTrigger>
-          <TabsTrigger value="jadwal"><Calendar1Icon/>Jadwal</TabsTrigger>
+          <TabsTrigger value="monitor" className="flex items-center gap-2">
+            <InfoIcon className="h-4 w-4" />
+            <span>Status</span>
+          </TabsTrigger>
+          <TabsTrigger value="statistik" className="flex items-center gap-2">
+            <TrendingUpIcon className="h-4 w-4" />
+            <span>Statistik</span>
+          </TabsTrigger>
+          <TabsTrigger value="jadwal" className="flex items-center gap-2">
+            <Calendar1Icon className="h-4 w-4" />
+            <span>Jadwal</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab Monitor */}

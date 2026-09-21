@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { TrendingUp, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -27,7 +27,7 @@ interface ScheduleChartProps {
 const chartConfig = {
   total: {
     label: "Total Sesi",
-    color: "var(--chart-1)",
+    color: "oklch(78.5% 0.115 274.713)",
   },
 } satisfies ChartConfig;
 
@@ -49,7 +49,7 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
   }, [schedules]);
 
   return (
-    <Card>
+    <Card className="flex flex-col justify-between">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -67,12 +67,12 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
       </CardHeader>
 
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-[220px] w-full">
           <AreaChart
             accessibilityLayer
             data={chartData}
             margin={{
-              left: 0,
+              left: -10,
               right: 12,
               top: 10,
               bottom: 0,
@@ -90,6 +90,7 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
+              domain={[0, "dataMax + 1"]}
               tickMargin={8}
             />
             <ChartTooltip
@@ -98,10 +99,10 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
             />
             <Area
               dataKey="total"
-              type="natural"
-              fill="oklch(35.9% 0.144 278.697)"
-              fillOpacity={0.4}
-              stroke="oklch(35.9% 0.144 278.697)"
+              type="linear"
+              fill="var(--color-total)"   // Diperbarui dari --color-desktop
+              fillOpacity={0.35}
+              stroke="var(--color-total)" // Diperbarui dari --color-desktop
               strokeWidth={2}
             />
           </AreaChart>
@@ -110,7 +111,7 @@ export function ScheduleChart({ schedules }: ScheduleChartProps) {
 
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-xs">
-          <div className="grid gap-1">
+          <div className="grid gap-1 min-h-[38px]">
             <div className="flex items-center gap-1.5 font-medium leading-none">
               Total {totalClasses} sesi perkuliahan aktif minggu ini
             </div>

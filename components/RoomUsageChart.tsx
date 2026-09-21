@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Schedule } from "@/lib/schedule-utils";
+import { Schedule } from "@/lib/schedule";
 import { LAB_ROOMS } from "@/lib/room-constants";
 
 interface RoomUsageChartProps {
@@ -28,7 +28,7 @@ interface RoomUsageChartProps {
 const chartConfig = {
   usage: {
     label: "Sesi Pemakaian",
-    color: "var(--chart-2)",
+    color: "oklch(78.5% 0.115 274.713)",
   },
 } satisfies ChartConfig;
 
@@ -51,7 +51,7 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
   }, [chartData]);
 
   return (
-    <Card>
+    <Card className="flex flex-col justify-between">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -68,8 +68,8 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
         </div>
       </CardHeader>
 
-      <CardContent>
-        <ChartContainer config={chartConfig}>
+<CardContent>
+        <ChartContainer config={chartConfig} className="h-[260px] w-full">
           <BarChart
             accessibilityLayer
             data={chartData}
@@ -77,7 +77,7 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
               left: 0,
               right: 12,
               top: 10,
-              bottom: 0,
+              bottom: 25, // Tambah ruang di bawah agar teks yang miring tidak terpotong
             }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -86,11 +86,16 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
+              interval={0}
+              tick={{ fontSize: 10 }}
+              angle={-25} // Miringkan teks sedikit agar muat di layar kecil
+              textAnchor="end" // Titik jangkar teks menyesuaikan kemiringan
             />
             <YAxis
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
+              domain={[0, "dataMax + 1"]}
               tickMargin={8}
             />
             <ChartTooltip
@@ -99,8 +104,8 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
             />
             <Bar
               dataKey="usage"
-              fill="oklch(35.9% 0.144 278.697)"
-              fillOpacity={0.4}
+              fill="var(--color-usage)"
+              fillOpacity={0.8}
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
@@ -109,11 +114,11 @@ export function RoomUsageChart({ schedules }: RoomUsageChartProps) {
 
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-xs">
-          <div className="grid gap-1">
+          <div className="grid gap-1 min-h-[38px]">
             {busiestRoom && busiestRoom.usage > 0 ? (
               <div className="flex items-center gap-1.5 font-medium leading-none">
                 <BarChart3 className="h-3.5 w-3.5 text-indigo-500" />
-                {busiestRoom.room} {busiestRoom.usage} sesi
+                Terpadat: {busiestRoom.room} ({busiestRoom.usage} sesi)
               </div>
             ) : (
               <div className="flex items-center gap-1.5 font-medium leading-none text-muted-foreground">

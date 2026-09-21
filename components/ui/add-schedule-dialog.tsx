@@ -22,15 +22,13 @@ import {
 } from "@/components/ui/select";
 import {
   Plus,
-  AlertCircle,
-  CheckCircle2,
   AlertCircleIcon,
   CheckCircle2Icon,
 } from "lucide-react";
 import { DAYS_OF_WEEK } from "@/lib/schedule";
 import { LAB_ROOMS } from "@/lib/room-constants";
 import { PRODI } from "@/lib/prodi-constants";
-import { SEMESTERS } from "@/lib/semester-constants"; // <-- Import dari file konstan
+import { SEMESTERS } from "@/lib/semester-constants";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Combobox,
@@ -53,7 +51,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
 
   const [courseName, setCourseName] = useState("");
   const [prodi, setProdi] = useState<string>("");
-  const [semester, setSemester] = useState<string>(String(""));
+  const [semester, setSemester] = useState<string>("");
   const [day, setDay] = useState(DAYS_OF_WEEK[0]);
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("10:00");
@@ -64,8 +62,15 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
     setErrorMsg(null);
     setSuccessMsg(null);
 
+    // 1. Validasi field kosong
     if (!courseName || !prodi || !room || !semester) {
       setErrorMsg("Semua field wajib diisi, bosku!");
+      return;
+    }
+
+    // 2. Validasi tambahan: Jam selesai harus setelah jam mulai
+    if (startTime >= endTime) {
+      setErrorMsg("Jam selesai harus lebih besar dari jam mulai, bosku!");
       return;
     }
 
@@ -74,7 +79,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
       {
         course_name: courseName,
         prodi,
-        semester: Number(semester), // Konversi ke number agar sesuai tipe integer di database
+        semester: Number(semester),
         day,
         start_time: startTime,
         end_time: endTime,
@@ -90,7 +95,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
       setSuccessMsg("Jadwal berhasil ditambahkan!");
       setCourseName("");
       setProdi("");
-      setSemester(String(""));
+      setSemester("");
 
       setTimeout(() => {
         setOpen(false);
@@ -110,7 +115,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
       }}
     >
       <DialogTrigger
-        className={buttonVariants({ size: "sm" }) + " gap-2 cursor-pointer"}
+        className={buttonVariants({ size: "sm" }) + " gap-2"}
       >
         <Plus className="h-4 w-4" /> Tambah Jadwal
       </DialogTrigger>
@@ -129,7 +134,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
           )}
 
           {successMsg && (
-            <Alert className=" text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/20">
+            <Alert className="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/20">
               <CheckCircle2Icon />
               <AlertTitle>Sukses!</AlertTitle>
               <AlertDescription>{successMsg}</AlertDescription>
@@ -173,9 +178,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
               <Combobox
                 items={SEMESTERS}
                 value={semester}
-                onValueChange={(val) =>
-                  setSemester(val ?? String(""))
-                }
+                onValueChange={(val) => setSemester(val ?? "")}
               >
                 <ComboboxInput placeholder="Semester" />
                 <ComboboxContent>
