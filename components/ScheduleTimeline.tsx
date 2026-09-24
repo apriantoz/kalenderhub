@@ -136,7 +136,7 @@ export function ScheduleTimeline({
                             {/* Bagian Kiri: Mata Kuliah & Info Ruang/Prodi */}
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2 min-w-0">
-                                <h4 className="font-medium text-sm leading-snug break-words group-hover:text-slate-700 transition-colors max-w-full">
+                                <h4 className="font-medium text-sm leading-snug break-words group-hover:text-primary transition-colors max-w-full">
                                   {courseName}
                                 </h4>
 
