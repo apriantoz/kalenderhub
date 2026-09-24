@@ -37,7 +37,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from "./combobox";
+} from "./ui/combobox";
 
 interface AddScheduleDialogProps {
   onSuccess: () => void;

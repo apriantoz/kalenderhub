@@ -28,7 +28,7 @@ interface RoomUsageChartProps {
 const chartConfig = {
   usage: {
     label: "Sesi Pemakaian",
-    color: "oklch(78.5% 0.115 274.713)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 

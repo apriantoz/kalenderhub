@@ -32,7 +32,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from "./combobox";
+} from "./ui/combobox";
 
 interface EditScheduleDialogProps {
   schedule: Schedule;

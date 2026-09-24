@@ -7,7 +7,7 @@ import {
   isSessionActive,
   Schedule,
 } from "@/lib/schedule";
-import { EditScheduleDialog } from "@/components/ui/edit-schedule-dialog";
+import { EditScheduleDialog } from "@/components/edit-schedule-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Trash2,

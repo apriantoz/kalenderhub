@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -18,13 +19,14 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${geist.className} h-full dark antialiased scrollbar-gutter-stable`}
+      suppressHydrationWarning
+      className={`${geist.className} h-full antialiased scrollbar-gutter-stable`}
     >
-      <body className="min-h-full flex flex-col bg-fixed">
-        <main>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange><main>
           {children}
         </main>
-        <Toaster />
+        <Toaster /></ThemeProvider>
       </body>
     </html>
   );

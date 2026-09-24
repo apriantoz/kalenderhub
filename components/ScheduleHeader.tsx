@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { AddScheduleDialog } from "@/components/ui/add-schedule-dialog";
+import { AddScheduleDialog } from "@/components/add-schedule-dialog";
 import { LogIn, LogOut } from "lucide-react";
 import { AdminMessageDialog } from "./AdminMessage";
 
@@ -34,13 +34,13 @@ export function ScheduleHeader({
               size={'sm'}
               onClick={onLogout}
             >
-              <LogOut className="mr-1.5 h-4 w-4" />Logout
+              <LogOut className="mr-1.5 h-4 w-4 text-primary" />Logout
             </Button>
           </>
         ) : (
           <Link href="/login">
             <Button variant="outline" size={'sm'}>
-              <LogIn className="mr-1.5 h-4 w-4"/>Login
+              <LogIn className="mr-1.5 h-4 w-4 text-primary"/>Login
             </Button>
           </Link>
         )}

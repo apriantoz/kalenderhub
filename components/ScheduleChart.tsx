@@ -27,7 +27,7 @@ interface ScheduleChartProps {
 const chartConfig = {
   total: {
     label: "Total Sesi",
-    color: "oklch(78.5% 0.115 274.713)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
