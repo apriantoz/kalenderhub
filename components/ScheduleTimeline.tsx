@@ -15,6 +15,8 @@ import {
   Radio,
   CogIcon,
   Monitor,
+  Dot,
+  Calendar1Icon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -70,25 +72,22 @@ export function ScheduleTimeline({
 
         return (
           <Card key={day} className="w-full transition-all duration-200 overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
-              <CardTitle>
-                <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-base tracking-tight">{day}</h3>
-                  <span className="text-xs text-muted-foreground font-medium px-2.5 py-0.5 rounded-full border">
-                    {daySchedules.length} Sesi
-                  </span>
-                </div>
-              </CardTitle>
-              <CardDescription />
-              <CardAction>
-                {isToday && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-indigo-500 border border-indigo-500 px-3 py-1 rounded-full">
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-ping" />
-                    Hari Ini
-                  </span>
-                )}
-              </CardAction>
-            </CardHeader>
+<CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b">
+  <CardTitle className="w-full sm:w-auto">
+    <div className="flex flex-wrap items-center gap-3">
+      <h3 className="font-semibold text-base tracking-tight">{day}</h3>
+      <Badge variant="secondary">
+        {daySchedules.length} Sesi
+      </Badge>
+    </div>
+  </CardTitle>
+  <CardDescription />
+  <CardAction className="self-start sm:self-auto">
+    {isToday && (
+      <Badge className="inline-flex animate-pulse"><Calendar1Icon/>Hari ini</Badge>
+    )}
+  </CardAction>
+</CardHeader>
 
             <CardContent className="pt-6 overflow-hidden">
               {daySchedules.length === 0 ? (
@@ -122,7 +121,7 @@ export function ScheduleTimeline({
                             className={cn(
                               "h-3.5 w-3.5 rounded-full border-2 transition-all group-hover:scale-125 z-10 shrink-0 mt-1.5",
                               isActive
-                                ? "border-indigo-400 bg-indigo-500"
+                                ? "bg-primary"
                                 : isConflict
                                   ? "border-rose-400 bg-rose-500 animate-pulse"
                                   : "border-slate-300 bg-muted group-hover:border-slate-400"
@@ -143,10 +142,10 @@ export function ScheduleTimeline({
 
                                 {isActive && (
                                   <Badge
-                                    variant="secondary"
+                                    variant="outline"
                                     className="text-[10px] font-medium gap-1 shrink-0"
                                   >
-                                    <Radio className="h-3 w-3 animate-ping text-indigo-400" />
+                                    <Radio className="h-3 w-3 animate-ping text-primary" />
                                     Sedang Berlangsung
                                   </Badge>
                                 )}
@@ -182,9 +181,9 @@ export function ScheduleTimeline({
                                 className={cn(
                                   "text-xs font-mono px-2.5 py-1 rounded-md font-medium border",
                                   isActive
-                                    ? "bg-indigo-600 border-indigo-500 text-white"
+                                    ? "bg-primary text-white"
                                     : isConflict
-                                      ? "bg-rose-600 border-rose-500 text-white"
+                                      ? "bg-rose-600 text-white"
                                       : "text-muted-foreground"
                                 )}
                               >
