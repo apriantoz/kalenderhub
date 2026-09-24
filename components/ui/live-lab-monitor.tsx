@@ -62,7 +62,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
       <Card className="border-border/60 shadow-sm flex flex-col h-full">
         <CardHeader className="py-3 px-4 border-b flex flex-row items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-500">
+            <div className="p-2 rounded-lg bg-primary/10 border border-primary text-primary">
               <MonitorPlay className="h-4 w-4 animate-pulse" />
             </div>
             <div>
@@ -75,8 +75,8 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
             </div>
           </div>
           <CardAction>
-            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1 rounded-lg border bg-muted/40">
-              <Clock className="h-3.5 w-3.5 text-indigo-500" />
+            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground font-mono px-3 py-1 rounded-lg border border-primary bg-primary/10">
+              <Clock className="h-3.5 w-3.5 text-primary" />
               <span>
                 {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Makassar' })} WITA
               </span>
