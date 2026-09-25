@@ -25,6 +25,7 @@ import { FooterHub } from "@/components/FooterHub";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar1Icon, InfoIcon, TrendingUpIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ScheduleMain() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -32,12 +33,10 @@ export default function ScheduleMain() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [, setNow] = useState(() => new Date());
 
-  // State Filter
   const [selectedProdi, setSelectedProdi] = useState<string>("");
   const [selectedRoom, setSelectedRoom] = useState<string>("");
-  const [searchSubject, setSearchSubject] = useState<string>(""); // <-- State untuk input pencarian mata kuliah
+  const [searchSubject, setSearchSubject] = useState<string>("");
 
-  // State Delete Dialog Konfirmasi shadcn/ui
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
     courseName: string;
@@ -45,7 +44,6 @@ export default function ScheduleMain() {
 
   const router = useRouter();
 
-  // Timer refresh tiap 1 menit untuk update status "Sedang Berlangsung"
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
@@ -57,7 +55,11 @@ export default function ScheduleMain() {
       .select("*")
       .order("start_time", { ascending: true });
 
-    if (!error) setSchedules(data || []);
+    if (error) {
+      toast.error("Gagal memuat ulang data jadwal.");
+    } else {
+      setSchedules(data || []);
+    }
   };
 
   useEffect(() => {
@@ -75,7 +77,11 @@ export default function ScheduleMain() {
         .order("start_time", { ascending: true });
 
       if (!ignore) {
-        if (!error) setSchedules(data || []);
+        if (error) {
+          toast.error("Gagal mengambil data dari database.");
+        } else {
+          setSchedules(data || []);
+        }
         setLoading(false);
       }
     }
@@ -106,13 +112,11 @@ export default function ScheduleMain() {
     };
   }, []);
 
-  // Data Jadwal Terfilter (Prodi, Ruangan, & Pencarian Mata Kuliah)
   const filteredSchedules = useMemo(() => {
     return schedules.filter((item) => {
       const matchProdi = !selectedProdi || item.prodi === selectedProdi;
       const matchRoom = !selectedRoom || item.room === selectedRoom;
       
-      // Sesuaikan item.course_name / item.courseName dengan kolom di database bosku
       const courseTitle = item.course_name || item.courseName || "";
       const matchSubject = !searchSubject || courseTitle.toLowerCase().includes(searchSubject.toLowerCase());
 
@@ -127,6 +131,7 @@ export default function ScheduleMain() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
+    toast.success("Berhasil keluar dari mode Admin.");
     router.refresh();
   };
 
@@ -137,27 +142,34 @@ export default function ScheduleMain() {
     setDeleteTarget({ id, courseName: resolvedName });
   };
 
+  // 🔔 EKSEKUSI HAPUS DENGAN TOAST NOTIFICATION
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    
+    const targetName = deleteTarget.courseName;
     const { error } = await supabase
       .from("schedules")
       .delete()
       .eq("id", deleteTarget.id);
-    if (!error) {
+
+    if (error) {
+      toast.error(`Gagal menghapus jadwal "${targetName}".`);
+    } else {
+      toast.success(`Jadwal "${targetName}" berhasil dihapus.`);
       reloadSchedules();
     }
+    
     setDeleteTarget(null);
   };
 
   const handleResetFilter = () => {
     setSelectedProdi("");
     setSelectedRoom("");
-    setSearchSubject(""); // <-- Reset input pencarian juga
+    setSearchSubject("");
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6 overflow-x-hidden">
-      {/* 1. Komponen Header */}
       <ScheduleHeader
         isAdmin={isAdmin}
         onReloadSchedules={reloadSchedules}
@@ -180,7 +192,6 @@ export default function ScheduleMain() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab Monitor */}
         <TabsContent value="monitor" className="my-4">
           {loading ? (
             <div className="flex items-center justify-center py-16 w-full">
@@ -191,7 +202,6 @@ export default function ScheduleMain() {
           )}
         </TabsContent>
 
-        {/* Tab Statistik */}
         <TabsContent value="statistik" className="my-4">
           {loading ? (
             <div className="flex items-center justify-center py-16 w-full">
@@ -205,7 +215,6 @@ export default function ScheduleMain() {
           )}
         </TabsContent>
 
-        {/* Tab Jadwal dengan ScheduleSkeleton */}
         <TabsContent value="jadwal">
           {loading ? (
             <div className="my-4">
@@ -225,6 +234,7 @@ export default function ScheduleMain() {
               />
               <ScheduleTimeline
                 filteredSchedules={filteredSchedules}
+                allSchedules={schedules}
                 conflictingIds={conflictingIds}
                 isAdmin={isAdmin}
                 onReloadSchedules={reloadSchedules}
@@ -237,7 +247,6 @@ export default function ScheduleMain() {
 
       <FooterHub />
 
-      {/* Dialog Konfirmasi Hapus */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

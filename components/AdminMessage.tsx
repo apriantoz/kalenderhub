@@ -17,9 +17,9 @@ import { Label } from "@/components/ui/label";
 import { MessageSquarePlus, Send, AlertCircle } from "lucide-react";
 import { FieldGroup, Field } from "@/components/ui/field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "@/components/ui/toast";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
+import { toast } from "sonner";
 
 export function AdminMessageDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,10 +63,7 @@ export function AdminMessageDialog() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.add({
-          type: "success",
-          description: "Laporan kendala berhasil dikirim ke Telegram Admin.",
-        });
+        toast.success("Laporan terkirim");
 
         setMessageText("");
         setSenderName("");

@@ -21,7 +21,6 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardAction,
   CardContent,
 } from "@/components/ui/card";
@@ -29,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface ScheduleTimelineProps {
   filteredSchedules: Schedule[];
+  allSchedules: Schedule[]; // <-- Data utuh untuk referensi pencarian detail bentrok
   conflictingIds: Set<string>;
   isAdmin: boolean;
   onReloadSchedules: () => void;
@@ -37,6 +37,7 @@ interface ScheduleTimelineProps {
 
 export function ScheduleTimeline({
   filteredSchedules,
+  allSchedules,
   conflictingIds,
   isAdmin,
   onReloadSchedules,
@@ -74,11 +75,11 @@ export function ScheduleTimeline({
                   <Badge variant="secondary">{daySchedules.length} Sesi</Badge>
                 </div>
               </CardTitle>
-              <CardDescription />
+              
               <CardAction className="self-start sm:self-auto">
                 {isToday && (
                   <Badge className="inline-flex animate-pulse">
-                    <Calendar1Icon />
+                    <Calendar1Icon className="h-3 w-3 mr-1" />
                     Hari ini
                   </Badge>
                 )}
@@ -105,7 +106,8 @@ export function ScheduleTimeline({
 
                     let conflictDetail = "";
                     if (isConflict) {
-                      const conflictingPartner = filteredSchedules.find(
+                      // Pake allSchedules supaya meskipun difilter, detail prodi/matkul tetep ketemu!
+                      const conflictingPartner = allSchedules.find(
                         (s) =>
                           s.id !== item.id &&
                           s.day?.trim().toLowerCase() === item.day?.trim().toLowerCase() &&
@@ -159,7 +161,7 @@ export function ScheduleTimeline({
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b w-full min-w-0">
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2 min-w-0">
-                                <h4 className="font-medium text-sm leading-snug wrap-break-word group-hover:text-primary transition-colors max-w-full">
+                                <h4 className="font-medium text-sm leading-snug break-words group-hover:text-primary transition-colors max-w-full">
                                   {courseName}
                                 </h4>
 
@@ -217,13 +219,11 @@ export function ScheduleTimeline({
 
                               {isAdmin && (
                                 <div className="flex items-center gap-1">
-                                  {/* Tombol Edit Dialog Berdiri Sendiri */}
                                   <EditScheduleDialog
                                     schedule={item}
                                     onSuccess={onReloadSchedules}
                                   />
 
-                                  {/* Tombol Hapus */}
                                   <Button
                                     variant="ghost"
                                     size="icon"
