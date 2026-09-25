@@ -20,7 +20,7 @@ export default function RootLayout({
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${geist.className} h-full antialiased`}
+      className={`${geist.className} h-full antialiased scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-slate-200 dark:bg-background">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
