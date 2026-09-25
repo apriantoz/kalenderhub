@@ -251,8 +251,8 @@ export default function ScheduleMain() {
           </Tabs>
         </Card>
 
-        <FooterHub />
       </div>
+      <FooterHub />
 
       <AlertDialog
         open={!!deleteTarget}
