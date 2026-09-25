@@ -35,6 +35,7 @@ export default function ScheduleMain() {
   // State Filter
   const [selectedProdi, setSelectedProdi] = useState<string>("");
   const [selectedRoom, setSelectedRoom] = useState<string>("");
+  const [searchSubject, setSearchSubject] = useState<string>(""); // <-- State untuk input pencarian mata kuliah
 
   // State Delete Dialog Konfirmasi shadcn/ui
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -105,14 +106,19 @@ export default function ScheduleMain() {
     };
   }, []);
 
-  // Data Jadwal Terfilter
+  // Data Jadwal Terfilter (Prodi, Ruangan, & Pencarian Mata Kuliah)
   const filteredSchedules = useMemo(() => {
     return schedules.filter((item) => {
       const matchProdi = !selectedProdi || item.prodi === selectedProdi;
       const matchRoom = !selectedRoom || item.room === selectedRoom;
-      return matchProdi && matchRoom;
+      
+      // Sesuaikan item.course_name / item.courseName dengan kolom di database bosku
+      const courseTitle = item.course_name || item.courseName || "";
+      const matchSubject = !searchSubject || courseTitle.toLowerCase().includes(searchSubject.toLowerCase());
+
+      return matchProdi && matchRoom && matchSubject;
     });
-  }, [schedules, selectedProdi, selectedRoom]);
+  }, [schedules, selectedProdi, selectedRoom, searchSubject]);
 
   const conflictingIds = useMemo(() => {
     return getConflictingScheduleIds(schedules);
@@ -146,6 +152,7 @@ export default function ScheduleMain() {
   const handleResetFilter = () => {
     setSelectedProdi("");
     setSelectedRoom("");
+    setSearchSubject(""); // <-- Reset input pencarian juga
   };
 
   return (
@@ -209,8 +216,10 @@ export default function ScheduleMain() {
               <ScheduleFilterBar
                 selectedProdi={selectedProdi}
                 selectedRoom={selectedRoom}
+                searchSubject={searchSubject}
                 onProdiChange={setSelectedProdi}
                 onRoomChange={setSelectedRoom}
+                onSearchSubjectChange={setSearchSubject}
                 onResetFilter={handleResetFilter}
                 filteredSchedules={filteredSchedules}
               />
