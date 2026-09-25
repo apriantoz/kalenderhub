@@ -38,7 +38,7 @@ const sortScheduleData = (data: Schedule[]): Schedule[] => {
 };
 
 // ==========================================
-// 1. Export Ke Excel (.xlsx) - Menggunakan ExcelJS
+// 1. Export Ke Excel (.xlsx) - Hari yang sama di-merge (digabung)
 // ==========================================
 export const exportToExcel = async (
   data: Schedule[],
@@ -67,93 +67,179 @@ export const exportToExcel = async (
   };
   headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
+  let currentDay = '';
+  let startRowForMerge = 2; // Baris awal data setelah header
+
   sortedData.forEach((item, index) => {
+    const dayValue = item.day || '-';
+    const rowIndex = index + 2;
+
     worksheet.addRow({
       no: index + 1,
-      day: item.day || '-',
+      day: dayValue,
       time: `${item.start_time || ''} - ${item.end_time || ''}`,
       room: item.room || '-',
       course_name: item.course_name || '-',
       prodi: item.prodi || '-',
     });
+
+    // Styling baris data
+    const row = worksheet.getRow(rowIndex);
+    row.alignment = { vertical: 'middle' };
+
+    // Logika untuk menggabungkan (merge) sel hari yang sama secara vertikal
+    if (dayValue !== currentDay) {
+      if (index > 0 && rowIndex - 1 > startRowForMerge) {
+        // Merge hari sebelumnya yang berulang
+        worksheet.mergeCells(startRowForMerge, 2, rowIndex - 1, 2);
+      }
+      currentDay = dayValue;
+      startRowForMerge = rowIndex;
+    }
+
+    // Jika ini adalah baris terakhir, lakukan merge sisa hari terakhir
+    if (index === sortedData.length - 1 && rowIndex > startRowForMerge) {
+      worksheet.mergeCells(startRowForMerge, 2, rowIndex, 2);
+    }
   });
 
-  worksheet.getColumn('no').alignment = { horizontal: 'center' };
-  worksheet.getColumn('time').alignment = { horizontal: 'center' };
+  // Ratakan teks kolom tertentu
+  worksheet.getColumn('no').alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.getColumn('day').alignment = { horizontal: 'center', vertical: 'middle' };
+  worksheet.getColumn('time').alignment = { horizontal: 'center', vertical: 'middle' };
+
+  // Tambahkan border tipis ke seluruh sel agar rapi
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'CBD5E1' } },
+        left: { style: 'thin', color: { argb: 'CBD5E1' } },
+        bottom: { style: 'thin', color: { argb: 'CBD5E1' } },
+        right: { style: 'thin', color: { argb: 'CBD5E1' } },
+      };
+    });
+  });
 
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), fileName);
 };
 
 // ==========================================
+
 // 2. Export Ke PDF (.pdf) - Menggunakan jsPDF
+
 // ==========================================
+
 export const exportToPDF = (
   data: Schedule[],
-  fileName = 'Rekap_Jadwal_Lab.pdf'
+
+  fileName = "Rekap_Jadwal_Lab.pdf",
 ): void => {
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
   const sortedData = sortScheduleData(data);
 
   doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('REKAPITULASI JADWAL LABORATORIUM KOMPUTER', 14, 15);
+
+  doc.setFont("helvetica", "bold");
+
+  doc.text("REKAPITULASI JADWAL LABORATORIUM KOMPUTER", 14, 15);
 
   doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
+
+  doc.setFont("helvetica", "normal");
+
   doc.text(
-    `Dicetak pada: ${new Date().toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    `Dicetak pada: ${new Date().toLocaleDateString("id-ID", {
+      day: "numeric",
+
+      month: "long",
+
+      year: "numeric",
+
+      hour: "2-digit",
+
+      minute: "2-digit",
     })}`,
+
     14,
-    21
+
+    21,
   );
 
-  const tableColumn = ['No', 'Hari', 'Jam', 'Ruangan', 'Mata Kuliah', 'Program Studi'];
-  
+  const tableColumn = [
+    "No",
+    "Hari",
+    "Jam",
+    "Ruangan",
+    "Mata Kuliah",
+    "Program Studi",
+  ];
+
   // Memastikan tipe data bersih dari undefined (diberi fallback string kosong)
+
   const tableRows = sortedData.map((item, index) => [
     index + 1,
-    item.day || '-',
-    `${item.start_time || ''} - ${item.end_time || ''}`,
-    item.room || '-',
-    item.course_name || '-',
-    item.prodi || '-',
+
+    item.day || "-",
+
+    `${item.start_time || ""} - ${item.end_time || ""}`,
+
+    item.room || "-",
+
+    item.course_name || "-",
+
+    item.prodi || "-",
   ]);
 
   autoTable(doc, {
     head: [tableColumn],
+
     body: tableRows,
+
     startY: 25,
-    theme: 'grid',
-    styles: { fontSize: 8.5, cellPadding: 3, font: 'helvetica' },
+
+    theme: "grid",
+
+    styles: { fontSize: 8.5, cellPadding: 3, font: "helvetica" },
+
     headStyles: {
       fillColor: [30, 41, 59], // Slate 800
+
       textColor: [255, 255, 255],
-      fontStyle: 'bold',
-      halign: 'center',
+
+      fontStyle: "bold",
+
+      halign: "center",
     },
+
     columnStyles: {
-      0: { halign: 'center', cellWidth: 12 }, // No
-      1: { cellWidth: 25 },                  // Hari
-      2: { halign: 'center', cellWidth: 35 }, // Jam
-      3: { cellWidth: 40 },                  // Ruangan
+      0: { halign: "center", cellWidth: 12 }, // No
+
+      1: { cellWidth: 25 }, // Hari
+
+      2: { halign: "center", cellWidth: 35 }, // Jam
+
+      3: { cellWidth: 40 }, // Ruangan
     },
+
     alternateRowStyles: { fillColor: [248, 250, 252] },
+
     didDrawPage: (dataArg) => {
       const pageCount = doc.getNumberOfPages();
+
       doc.setFontSize(8);
+
       doc.setTextColor(100);
+
       doc.text(
         `Halaman ${dataArg.pageNumber} dari ${pageCount}`,
+
         doc.internal.pageSize.width - 20,
+
         doc.internal.pageSize.height - 10,
-        { align: 'right' }
+
+        { align: "right" },
       );
     },
   });
