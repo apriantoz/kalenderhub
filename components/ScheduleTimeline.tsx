@@ -104,13 +104,36 @@ export function ScheduleTimeline({
                   {daySchedules.map((item, index) => {
                     const isConflict = conflictingIds.has(item.id);
 
-                    const startTime = item.start_time || item.startTime;
-                    const endTime = item.end_time || item.endTime;
+                    const startTime = item.start_time || item.startTime || "";
+                    const endTime = item.end_time || item.endTime || "";
                     const courseName =
                       item.course_name ||
                       item.courseName ||
                       "Tanpa Nama Mata Kuliah";
                     const roomName = item.room || item.labName || "-";
+
+                    // Mencari info jadwal lain yang bentrok di ruangan & hari yang sama
+                    let conflictDetail = "";
+                    if (isConflict) {
+                      const conflictingPartner = filteredSchedules.find(
+                        (s) =>
+                          s.id !== item.id &&
+                          s.day?.trim().toLowerCase() === item.day?.trim().toLowerCase() &&
+                          (s.room || s.labName) === roomName &&
+                          // Cek irisan waktu
+                          ((s.start_time || s.startTime || "") < endTime &&
+                            (s.end_time || s.endTime || "") > startTime)
+                      );
+
+                      if (conflictingPartner) {
+                        const partnerCourse =
+                          conflictingPartner.course_name ||
+                          conflictingPartner.courseName ||
+                          "Matkul Lain";
+                        const partnerProdi = conflictingPartner.prodi || "Prodi Lain";
+                        conflictDetail = ` (${partnerProdi} - ${partnerCourse})`;
+                      }
+                    }
 
                     const isActive = isSessionActive(
                       item.day,
@@ -128,7 +151,7 @@ export function ScheduleTimeline({
                         <div className="relative flex flex-col items-center shrink-0 w-4">
                           <div
                             className={cn(
-                              "absolute top-0 w-[2px] bg-slate-300 group-hover:bg-slate-300 transition-colors",
+                              "absolute top-0 w-0.5 bg-slate-300 group-hover:bg-slate-300 transition-colors",
                               isLast ? "h-3" : "bottom-0",
                             )}
                           />
@@ -150,14 +173,14 @@ export function ScheduleTimeline({
                             {/* Bagian Kiri: Mata Kuliah & Info Ruang/Prodi */}
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2 min-w-0">
-                                <h4 className="font-medium text-sm leading-snug break-words group-hover:text-primary transition-colors max-w-full">
+                                <h4 className="font-medium text-sm leading-snug wrap-break-word group-hover:text-primary transition-colors max-w-full">
                                   {courseName}
                                 </h4>
 
                                 {isActive && (
                                   <Badge
-                                    variant="outline"
-                                    className="text-[10px] font-medium gap-1 shrink-0"
+                                    variant="ghost"
+                                    className="text-[10px] font-medium gap-1 shrink-0 text-primary"
                                   >
                                     <Radio className="h-3 w-3 animate-ping text-primary" />
                                     Sedang Berlangsung
@@ -167,10 +190,13 @@ export function ScheduleTimeline({
                                 {isConflict && (
                                   <Badge
                                     variant="destructive"
-                                    className="text-[10px] font-medium gap-1 animate-pulse shrink-0"
+                                    className="text-[10px] font-medium gap-1 animate-pulse shrink-0 max-w-xs truncate"
+                                    title={`Bentrok dengan${conflictDetail}`}
                                   >
-                                    <AlertTriangle className="h-3 w-3" />
-                                    Bentrok Jadwal
+                                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">
+                                      Bentrok{conflictDetail}
+                                    </span>
                                   </Badge>
                                 )}
                               </div>

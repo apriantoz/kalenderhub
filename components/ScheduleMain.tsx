@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { LiveLabMonitor } from "@/components/ui/live-lab-monitor";
+import { LiveLabMonitor } from "@/components/live-lab-monitor";
 import { getConflictingScheduleIds, Schedule } from "@/lib/schedule";
 import { ScheduleHeader } from "@/components/ScheduleHeader";
 import { ScheduleFilterBar } from "@/components/ScheduleFilterBar";
