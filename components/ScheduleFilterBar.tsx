@@ -61,7 +61,7 @@ export function ScheduleFilterBar({
     selectedProdi !== "" || selectedRoom !== "" || searchSubject !== "";
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full">
       <Card>
         <CardHeader className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-4">
           {/* Sisi Kiri: Input Pencarian Mata Kuliah yang Luas & Menonjol */}

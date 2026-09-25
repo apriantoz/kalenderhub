@@ -22,8 +22,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geist.className} h-full antialiased scrollbar-gutter-stable`}
     >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange><main>
+      <body className="min-h-full flex flex-col bg-slate-200 dark:bg-background">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <main className="flex-1 w-full flex flex-col">
           {children}
         </main>
         <Toaster /></ThemeProvider>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AddScheduleDialog } from "@/components/add-schedule-dialog";
 import { LogIn, LogOut } from "lucide-react";
 import { AdminMessageDialog } from "./AdminMessage";
+import { ModeToggle } from "./ModeTogle";
 
 interface ScheduleHeaderProps {
   isAdmin: boolean;
@@ -45,6 +46,7 @@ export function ScheduleHeader({
           </Link>
         )}
         <AdminMessageDialog/>
+        <ModeToggle/>
       </div>
     </div>
   );

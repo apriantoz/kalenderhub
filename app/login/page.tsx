@@ -37,8 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
-      <Card className="w-full max-w-sm">
+    // Diubah menggunakan flex-1 dan w-full agar mengisi penuh layout utama
+    <div className="flex-1 w-full flex items-center justify-center p-4 bg-muted/30">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-2xl font-bold">Login Admin</CardTitle>
           <CardDescription>Masuk untuk mengelola jadwal kelas</CardDescription>

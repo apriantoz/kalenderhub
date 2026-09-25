@@ -54,9 +54,9 @@ export function AdminMessageDialog() {
         body: JSON.stringify({
           name: senderName.trim() || "Mahasiswa / Dosen",
           room: roomName.trim() || "Gedung Desain Hub",
-          wa:senderWA.trim() || "-",
+          wa: senderWA.trim() || "-",
           message: messageText,
-          token: turnstileToken, // Kirim token ke backend untuk divalidasi via siteverify
+          token: turnstileToken,
         }),
       });
 
@@ -74,7 +74,6 @@ export function AdminMessageDialog() {
         setIsOpen(false);
       } else {
         setErrorMessage(data.error || "Gagal mengirim laporan ke server.");
-        // Reset widget turnstile jika gagal agar user bisa generate token baru
         turnstileRef.current?.reset();
         setTurnstileToken(null);
       }
@@ -99,6 +98,7 @@ export function AdminMessageDialog() {
         }
       }}
     >
+      {/* Diperbaiki menggunakan prop render agar tidak terjadi dobel tag <button> */}
       <DialogTrigger
         render={
           <Button variant="outline" size="sm">
@@ -154,7 +154,6 @@ export function AdminMessageDialog() {
                   className="text-sm"
                   value={senderWA}
                   onChange={(e) => {
-                    // Hanya izinkan karakter angka (0-9) yang masuk ke state
                     const numericValue = e.target.value.replace(/\D/g, "");
                     setSenderWA(numericValue);
                   }}
@@ -208,7 +207,7 @@ export function AdminMessageDialog() {
                 onError={() =>
                   setErrorMessage("Verifikasi keamanan gagal dimuat.")
                 }
-                options={{ theme: "dark" }}
+                options={{ theme: "auto" }}
               />
             </div>
           </FieldGroup>

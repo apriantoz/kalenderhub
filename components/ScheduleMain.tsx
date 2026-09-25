@@ -26,6 +26,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar1Icon, InfoIcon, TrendingUpIcon } from "lucide-react";
 import { toast } from "sonner";
+import {Card} from "@/components/ui/card"
+import { Navbar } from "./Navbar";
 
 export default function ScheduleMain() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -142,7 +144,6 @@ export default function ScheduleMain() {
     setDeleteTarget({ id, courseName: resolvedName });
   };
 
-  // 🔔 EKSEKUSI HAPUS DENGAN TOAST NOTIFICATION
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     
@@ -169,83 +170,89 @@ export default function ScheduleMain() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6 overflow-x-hidden">
-      <ScheduleHeader
+    <div className="w-full min-h-screen flex flex-col">
+      {/* Navbar diletakkan di luar agar menempel full ke ujung kiri dan kanan layar */}
+      <Navbar
         isAdmin={isAdmin}
         onReloadSchedules={reloadSchedules}
         onLogout={handleLogout}
       />
 
-      <Tabs defaultValue="monitor">
-        <TabsList variant="line">
-          <TabsTrigger value="monitor" className="flex items-center gap-2">
-            <InfoIcon className="h-4 w-4" />
-            <span>Status</span>
-          </TabsTrigger>
-          <TabsTrigger value="statistik" className="flex items-center gap-2">
-            <TrendingUpIcon className="h-4 w-4" />
-            <span>Statistik</span>
-          </TabsTrigger>
-          <TabsTrigger value="jadwal" className="flex items-center gap-2">
-            <Calendar1Icon className="h-4 w-4" />
-            <span>Jadwal</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* Konten utama dibungkus padding terpisah */}
+      <div className="w-full px-4 md:px-8 py-6 space-y-6 flex-1">
+        <Card className="p-7">
+          <Tabs defaultValue="monitor">
+            <TabsList variant="line">
+              <TabsTrigger value="monitor" className="flex items-center gap-2">
+                <InfoIcon className="h-4 w-4" />
+                <span>Status</span>
+              </TabsTrigger>
+              <TabsTrigger value="statistik" className="flex items-center gap-2">
+                <TrendingUpIcon className="h-4 w-4" />
+                <span>Statistik</span>
+              </TabsTrigger>
+              <TabsTrigger value="jadwal" className="flex items-center gap-2">
+                <Calendar1Icon className="h-4 w-4" />
+                <span>Jadwal</span>
+              </TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="monitor" className="my-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-16 w-full">
-              <Spinner className="size-10" />
-            </div>
-          ) : (
-            <LiveLabMonitor schedules={schedules} />
-          )}
-        </TabsContent>
+            <TabsContent value="monitor" className="my-4">
+              {loading ? (
+                <div className="flex items-center justify-center py-16 w-full">
+                  <Spinner className="size-10" />
+                </div>
+              ) : (
+                <LiveLabMonitor schedules={schedules} />
+              )}
+            </TabsContent>
 
-        <TabsContent value="statistik" className="my-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-16 w-full">
-              <Spinner className="size-10" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-              <ScheduleChart schedules={filteredSchedules} />
-              <RoomUsageChart schedules={schedules} />
-            </div>
-          )}
-        </TabsContent>
+            <TabsContent value="statistik" className="my-4">
+              {loading ? (
+                <div className="flex items-center justify-center py-16 w-full">
+                  <Spinner className="size-10" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                  <ScheduleChart schedules={filteredSchedules} />
+                  <RoomUsageChart schedules={schedules} />
+                </div>
+              )}
+            </TabsContent>
 
-        <TabsContent value="jadwal">
-          {loading ? (
-            <div className="my-4">
-              <ScheduleSkeleton />
-            </div>
-          ) : (
-            <div className="w-full my-4 space-y-4">
-              <ScheduleFilterBar
-                selectedProdi={selectedProdi}
-                selectedRoom={selectedRoom}
-                searchSubject={searchSubject}
-                onProdiChange={setSelectedProdi}
-                onRoomChange={setSelectedRoom}
-                onSearchSubjectChange={setSearchSubject}
-                onResetFilter={handleResetFilter}
-                filteredSchedules={filteredSchedules}
-              />
-              <ScheduleTimeline
-                filteredSchedules={filteredSchedules}
-                allSchedules={schedules}
-                conflictingIds={conflictingIds}
-                isAdmin={isAdmin}
-                onReloadSchedules={reloadSchedules}
-                onDeleteClick={handleDeleteClick}
-              />
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="jadwal">
+              {loading ? (
+                <div className="my-4">
+                  <ScheduleSkeleton />
+                </div>
+              ) : (
+                <div className="w-full my-4 space-y-4">
+                  <ScheduleFilterBar
+                    selectedProdi={selectedProdi}
+                    selectedRoom={selectedRoom}
+                    searchSubject={searchSubject}
+                    onProdiChange={setSelectedProdi}
+                    onRoomChange={setSelectedRoom}
+                    onSearchSubjectChange={setSearchSubject}
+                    onResetFilter={handleResetFilter}
+                    filteredSchedules={filteredSchedules}
+                  />
+                  <ScheduleTimeline
+                    filteredSchedules={filteredSchedules}
+                    allSchedules={schedules}
+                    conflictingIds={conflictingIds}
+                    isAdmin={isAdmin}
+                    onReloadSchedules={reloadSchedules}
+                    onDeleteClick={handleDeleteClick}
+                  />
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </Card>
 
-      <FooterHub />
+        <FooterHub />
+      </div>
 
       <AlertDialog
         open={!!deleteTarget}
