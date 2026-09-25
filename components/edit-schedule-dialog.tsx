@@ -48,24 +48,13 @@ export function EditScheduleDialog({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Inisialisasi state dengan fallback aman (mendukung snake_case & camelCase)
-  const [courseName, setCourseName] = useState(
-    schedule.course_name || schedule.courseName || ""
-  );
-  const [prodi, setProdi] = useState(schedule.prodi || "");
-  const [semester, setSemester] = useState(
-    String(schedule.semester ?? SEMESTERS[0])
-  );
-  const [day, setDay] = useState(schedule.day || DAYS_OF_WEEK[0]);
-  const [startTime, setStartTime] = useState(
-    schedule.start_time || schedule.startTime || "08:00"
-  );
-  const [endTime, setEndTime] = useState(
-    schedule.end_time || schedule.endTime || "10:00"
-  );
-  const [room, setRoom] = useState(
-    schedule.room || schedule.labName || LAB_ROOMS[0]
-  );
+  const [courseName, setCourseName] = useState(schedule?.course_name || schedule?.courseName || "");
+  const [prodi, setProdi] = useState(schedule?.prodi || "");
+  const [semester, setSemester] = useState(String(schedule?.semester ?? SEMESTERS[0]));
+  const [day, setDay] = useState(schedule?.day || DAYS_OF_WEEK[0]);
+  const [startTime, setStartTime] = useState(schedule?.start_time || schedule?.startTime || "08:00");
+  const [endTime, setEndTime] = useState(schedule?.end_time || schedule?.endTime || "10:00");
+  const [room, setRoom] = useState(schedule?.room || schedule?.labName || LAB_ROOMS[0]);
 
   const handleUpdate = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -119,15 +108,31 @@ export function EditScheduleDialog({
         setOpen(val);
         setErrorMsg(null);
         setSuccessMsg(null);
+        
+        if (val && schedule) {
+          setCourseName(schedule.course_name || schedule.courseName || "");
+          setProdi(schedule.prodi || "");
+          setSemester(String(schedule.semester ?? SEMESTERS[0]));
+          setDay(schedule.day || DAYS_OF_WEEK[0]);
+          setStartTime(schedule.start_time || schedule.startTime || "08:00");
+          setEndTime(schedule.end_time || schedule.endTime || "10:00");
+          setRoom(schedule.room || schedule.labName || LAB_ROOMS[0]);
+        }
       }}
     >
+      {/* Menggunakan pola render dari referensi Shadcn UI terbaru Anda */}
       <DialogTrigger
-        className="w-full flex items-center gap-2 px-2 py-2 text-xs rounded-sm text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors outline-none select-none font-normal"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <Pencil className="h-3.5 w-3.5" />
-        <span>Edit</span>
-      </DialogTrigger>
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground rounded-lg"
+            title="Edit Jadwal"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        }
+      />
 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

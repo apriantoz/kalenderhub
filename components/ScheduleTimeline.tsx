@@ -13,17 +13,9 @@ import {
   Trash2,
   AlertTriangle,
   Radio,
-  CogIcon,
-  Monitor,
   Calendar1Icon,
+  Monitor,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -52,7 +44,6 @@ export function ScheduleTimeline({
 }: ScheduleTimelineProps) {
   const todayName = getCurrentDayName(false);
 
-  // Mengelompokkan jadwal berdasarkan hari menggunakan useMemo
   const schedulesByDay = useMemo(() => {
     const map: Record<string, Schedule[]> = {};
     DAYS_OF_WEEK.forEach((day) => {
@@ -112,7 +103,6 @@ export function ScheduleTimeline({
                       "Tanpa Nama Mata Kuliah";
                     const roomName = item.room || item.labName || "-";
 
-                    // Mencari info jadwal lain yang bentrok di ruangan & hari yang sama
                     let conflictDetail = "";
                     if (isConflict) {
                       const conflictingPartner = filteredSchedules.find(
@@ -120,7 +110,6 @@ export function ScheduleTimeline({
                           s.id !== item.id &&
                           s.day?.trim().toLowerCase() === item.day?.trim().toLowerCase() &&
                           (s.room || s.labName) === roomName &&
-                          // Cek irisan waktu
                           ((s.start_time || s.startTime || "") < endTime &&
                             (s.end_time || s.endTime || "") > startTime)
                       );
@@ -147,7 +136,6 @@ export function ScheduleTimeline({
                         key={item.id}
                         className="flex gap-4 group w-full min-w-0"
                       >
-                        {/* Kolom Garis & Dot Timeline */}
                         <div className="relative flex flex-col items-center shrink-0 w-4">
                           <div
                             className={cn(
@@ -167,10 +155,8 @@ export function ScheduleTimeline({
                           />
                         </div>
 
-                        {/* Konten Timeline */}
                         <div className="flex-1 pb-6 min-w-0 overflow-hidden">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b w-full min-w-0">
-                            {/* Bagian Kiri: Mata Kuliah & Info Ruang/Prodi */}
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2 min-w-0">
                                 <h4 className="font-medium text-sm leading-snug wrap-break-word group-hover:text-primary transition-colors max-w-full">
@@ -215,7 +201,6 @@ export function ScheduleTimeline({
                               </div>
                             </div>
 
-                            {/* Waktu & Tombol Aksi Admin */}
                             <div className="flex items-center justify-between md:justify-end gap-3 shrink-0">
                               <span
                                 className={cn(
@@ -231,39 +216,26 @@ export function ScheduleTimeline({
                               </span>
 
                               {isAdmin && (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger
-                                    render={
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground/60 rounded-lg"
-                                      >
-                                        <CogIcon className="h-4 w-4" />
-                                      </Button>
-                                    }
+                                <div className="flex items-center gap-1">
+                                  {/* Tombol Edit Dialog Berdiri Sendiri */}
+                                  <EditScheduleDialog
+                                    schedule={item}
+                                    onSuccess={onReloadSchedules}
                                   />
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="w-36 text-xs bg-background/50 backdrop-blur-md"
+
+                                  {/* Tombol Hapus */}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-rose-400 hover:text-rose-500 hover:bg-rose-950/20 rounded-lg"
+                                    onClick={() =>
+                                      onDeleteClick(item.id, courseName)
+                                    }
+                                    title="Hapus Jadwal"
                                   >
-                                    <EditScheduleDialog
-                                      schedule={item}
-                                      onSuccess={onReloadSchedules}
-                                    />
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      variant="destructive"
-                                      onClick={() =>
-                                        onDeleteClick(item.id, courseName)
-                                      }
-                                      className="cursor-pointer gap-2 py-1.5 text-xs text-rose-400 focus:text-rose-400 focus:bg-rose-950/40"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                      <span>Hapus</span>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           </div>
