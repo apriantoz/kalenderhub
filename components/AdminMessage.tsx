@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ModeToggle } from "@/components/ModeTogle";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   Dialog,
   DialogContent,
@@ -9,221 +12,164 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MessageSquarePlus, Send, AlertCircle } from "lucide-react";
-import { FieldGroup, Field } from "@/components/ui/field";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
-export function AdminMessageDialog() {
+export default function HomePage() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [senderName, setSenderName] = useState("");
-  const [roomName, setRoomName] = useState("");
-  const [messageText, setMessageText] = useState("");
-  const [senderWA, setSenderWA]=useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Fungsi saat tombol "Lihat Jadwal" diklik
+  const handleOpenSchedule = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!messageText.trim()) return;
+    setIsOpen(true);
+  };
 
-    // Validasi apakah Turnstile sudah diverifikasi
-    if (!turnstileToken) {
-      setErrorMessage("Selesaikan verifikasi keamanan (Turnstile) terlebih dahulu.");
-      return;
-    }
-
-    setIsSubmitting(true);
+  // Fungsi lanjut setelah verifikasi berhasil
+  const handleVerifySuccess = (token: string) => {
+    setTurnstileToken(token);
     setErrorMessage("");
+    setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/send-telegram", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: senderName.trim() || "Mahasiswa / Dosen",
-          room: roomName.trim() || "Gedung Desain Hub",
-          wa: senderWA.trim() || "-",
-          message: messageText,
-          token: turnstileToken,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success("Laporan terkirim");
-
-        setMessageText("");
-        setSenderName("");
-        setRoomName("");
-        setSenderWA("");
-        setTurnstileToken(null);
-        setErrorMessage("");
-        setIsOpen(false);
-      } else {
-        setErrorMessage(data.error || "Gagal mengirim laporan ke server.");
-        turnstileRef.current?.reset();
-        setTurnstileToken(null);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage("Terjadi kesalahan koneksi ke server.");
-      turnstileRef.current?.reset();
-      setTurnstileToken(null);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Redirect ke halaman jadwal setelah sukses verifikasi
+    setTimeout(() => {
+      router.push("/schedule");
+    }, 600);
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-          setErrorMessage("");
-          setTurnstileToken(null);
-        }
-      }}
-    >
-      {/* Diperbaiki menggunakan prop render agar tidak terjadi dobel tag <button> */}
-      <DialogTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <MessageSquarePlus className="w-4 h-4 text-primary" />
-            Lapor / Hubungi Admin
-          </Button>
-        }
+    <main className="relative min-h-screen w-full flex flex-col justify-between items-center overflow-hidden">
+      {/* 1. Dot Matrix / Noise Background */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none [background-image:radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.12)_1px,transparent_0)] dark:[background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)]"
+        style={{
+          backgroundSize: "24px 24px",
+        }}
       />
 
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSendMessage} className="space-y-4">
+      {/* 2. Soft Ambient Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none z-0" />
+
+      {/* Header Minimalis */}
+      <header className="relative z-10 w-full max-w-6xl px-6 py-6 flex justify-between items-center">
+        <div className="font-bold text-xl tracking-tight flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-primary inline-block"></span>
+          KalenderHub
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Link
+            href="/login"
+            className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
+          >
+            Masuk
+          </Link>
+          <ModeToggle />
+        </div>
+      </header>
+
+      {/* 3. Hero Content */}
+      <section className="relative z-10 flex-1 w-full max-w-4xl flex flex-col items-center justify-center text-center px-6 gap-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border text-xs font-medium shadow-sm animate-fade-in">
+          <span className="flex h-2 w-2 rounded-full bg-primary"></span>
+          V1.0
+        </div>
+
+        <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight leading-[1.1] bg-linear-to-br from-cyan-800 to-cyan-300 bg-clip-text text-transparent">
+          Kalender Hub
+        </h1>
+
+        <p className="max-w-xl text-lg text-gray-600 font-normal">
+          Jadwal penggunaan ruang kelas.
+        </p>
+
+        {/* Tombol Aksi (CTA) */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
+          <button
+            onClick={handleOpenSchedule}
+            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-medium text-lg shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+          >
+            Lihat Jadwal
+            <svg
+              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      {/* Footer Minimalis */}
+      <footer className="relative z-10 w-full py-6 text-center text-xs text-gray-400 border-t">
+        &copy; {new Date().getFullYear()} Kalender Hub. All rights reserved.
+      </footer>
+
+      {/* --- SHADCN DIALOG TURNSTILE --- */}
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          setIsOpen(open);
+          if (!open) {
+            setIsLoading(false);
+            setTurnstileToken(null);
+            setErrorMessage("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Kirim Pesan ke Admin Lab</DialogTitle>
+            <DialogTitle>Verifikasi Keamanan</DialogTitle>
             <DialogDescription>
-              Laporkan kendala fasilitas lab atau tanyakan jadwal khusus
-              langsung kepada pengelola Gedung Desain Hub.
+              Selesaikan verifikasi di bawah untuk melanjutkan ke halaman jadwal ruang kelas.
             </DialogDescription>
           </DialogHeader>
 
           {errorMessage && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Gagal</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
+            <p className="text-xs text-destructive text-center">{errorMessage}</p>
           )}
 
-          <FieldGroup className="grid gap-4 py-1">
-            <Field className="grid gap-2">
-              <Label htmlFor="name" className="text-xs text-muted-foreground">
-                Nama / Identitas (Opsional)
-              </Label>
-              <Input
-                id="name"
-                placeholder="Contoh: Budi (Mahasiswa Animasi)"
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                disabled={isSubmitting}
-                className="text-sm"
-              />
-            </Field>
-            <Field className="grid gap-2">
-              <Label htmlFor="wa" className="text-xs text-muted-foreground">
-                No. WhatsAPP untuk konfirmasi
-                <span className="text-destructive">*</span>
-              </Label>
-              <InputGroup>
-                <InputGroupAddon align="inline-start">+62</InputGroupAddon>
-                <InputGroupInput
-                  id="wa"
-                  placeholder="8123456789"
-                  type="tel"
-                  className="text-sm"
-                  value={senderWA}
-                  onChange={(e) => {
-                    const numericValue = e.target.value.replace(/\D/g, "");
-                    setSenderWA(numericValue);
-                  }}
-                  disabled={isSubmitting}
-                  required
-                />
-              </InputGroup>
-            </Field>
+          {/* Widget Turnstile */}
+          <div className="flex justify-center my-2">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+              onSuccess={handleVerifySuccess}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setErrorMessage("Verifikasi keamanan gagal dimuat.")}
+              options={{ theme: "auto" }}
+            />
+          </div>
 
-            <Field className="grid gap-2">
-              <Label htmlFor="room" className="text-xs text-muted-foreground">
-                Lokasi Lab / Ruangan (Opsional)
-              </Label>
-              <Input
-                id="room"
-                placeholder="Contoh: Ruang 1A"
-                value={roomName}
-                onChange={(e) => setRoomName(e.target.value)}
-                disabled={isSubmitting}
-                className="text-sm"
-              />
-            </Field>
+          {isLoading && (
+            <p className="text-xs text-primary font-medium text-center animate-pulse">
+              Verifikasi berhasil! Mengalihkan ke jadwal...
+            </p>
+          )}
 
-            <Field className="grid gap-2">
-              <Label
-                htmlFor="message"
-                className="text-xs text-muted-foreground"
-              >
-                Pesan / Kendala <span className="text-destructive">*</span>
-              </Label>
-              <Textarea
-                id="message"
-                placeholder="Tuliskan kendala fasilitas (misal: TV mati, AC kurang dingin)..."
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                disabled={isSubmitting}
-                className="min-h-[100px] resize-none text-sm"
-              />
-            </Field>
-
-            {/* Widget Cloudflare Turnstile */}
-            <div className="flex justify-center pt-1">
-              <Turnstile
-                ref={turnstileRef}
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
-                onSuccess={(token) => {
-                  setTurnstileToken(token);
-                  setErrorMessage("");
-                }}
-                onExpire={() => setTurnstileToken(null)}
-                onError={() =>
-                  setErrorMessage("Verifikasi keamanan gagal dimuat.")
-                }
-                options={{ theme: "auto" }}
-              />
-            </div>
-          </FieldGroup>
-
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+          <DialogFooter className="pt-2">
             <Button
-              type="submit"
-              disabled={isSubmitting || !messageText.trim() || !turnstileToken}
-              className="gap-2 w-full"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              className="w-full"
             >
-              <Send className="w-4 h-4" />
-              {isSubmitting ? "Mengirim..." : "Kirim Laporan"}
+              Batal
             </Button>
           </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </main>
   );
 }
