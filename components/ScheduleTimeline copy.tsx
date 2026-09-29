@@ -56,7 +56,7 @@ export function ScheduleTimeline({
   }, [filteredSchedules]);
 
   return (
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-full box-border">
+    <div className="w-full max-w-full space-y-4 box-border">
       {DAYS_OF_WEEK.map((day) => {
         const isToday = day.toLowerCase() === todayName.toLowerCase();
         const daySchedules = schedulesByDay[day] || [];
@@ -64,21 +64,21 @@ export function ScheduleTimeline({
         return (
           <Card
             key={day}
-            className="w-full transition-all duration-200 overflow-hidden flex flex-col"
+            className="w-full transition-all duration-200 overflow-hidden"
           >
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b">
               <CardTitle className="w-full sm:w-auto">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold text-sm tracking-tight">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="font-semibold text-base tracking-tight">
                     {day}
                   </h3>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">{daySchedules.length} Sesi</Badge>
+                  <Badge variant="secondary">{daySchedules.length} Sesi</Badge>
                 </div>
               </CardTitle>
               
               <CardAction className="self-start sm:self-auto">
                 {isToday && (
-                  <Badge className="inline-flex animate-pulse text-[10px] px-1.5 py-0.5">
+                  <Badge className="inline-flex animate-pulse">
                     <Calendar1Icon className="h-3 w-3 mr-1" />
                     Hari ini
                   </Badge>
@@ -86,10 +86,10 @@ export function ScheduleTimeline({
               </CardAction>
             </CardHeader>
 
-            <CardContent className="pt-4 overflow-hidden flex-1">
+            <CardContent className="pt-6 overflow-hidden">
               {daySchedules.length === 0 ? (
                 <p className="text-xs text-muted-foreground/50 italic py-4 text-center">
-                  Tidak ada jadwal.
+                  Tidak ada jadwal perkuliahan pada hari ini.
                 </p>
               ) : (
                 <div className="flex flex-col w-full">
@@ -106,6 +106,7 @@ export function ScheduleTimeline({
 
                     let conflictDetail = "";
                     if (isConflict) {
+                      // Pake allSchedules supaya meskipun difilter, detail prodi/matkul tetep ketemu!
                       const conflictingPartner = allSchedules.find(
                         (s) =>
                           s.id !== item.id &&
@@ -135,10 +136,9 @@ export function ScheduleTimeline({
                     return (
                       <div
                         key={item.id}
-                        className="flex gap-3 group w-full min-w-0"
+                        className="flex gap-4 group w-full min-w-0"
                       >
-                        {/* Timeline Bullet & Line */}
-                        <div className="relative flex flex-col items-center shrink-0 w-3">
+                        <div className="relative flex flex-col items-center shrink-0 w-4">
                           <div
                             className={cn(
                               "absolute top-0 w-0.5 bg-slate-300 group-hover:bg-slate-300 transition-colors",
@@ -147,9 +147,9 @@ export function ScheduleTimeline({
                           />
                           <div
                             className={cn(
-                              "h-3 w-3 rounded-full border-2 transition-all group-hover:scale-125 z-10 shrink-0 mt-1",
+                              "h-3.5 w-3.5 rounded-full border-2 transition-all group-hover:scale-125 z-10 shrink-0 mt-1.5",
                               isActive
-                                ? "bg-primary border-primary"
+                                ? "bg-primary"
                                 : isConflict
                                   ? "border-rose-400 bg-rose-500 animate-pulse"
                                   : "border-slate-300 bg-muted group-hover:border-slate-400",
@@ -157,44 +157,68 @@ export function ScheduleTimeline({
                           />
                         </div>
 
-                        {/* Timeline Content */}
-                        <div className="flex-1 pb-5 min-w-0 overflow-hidden">
-                          <div className="flex flex-col gap-2 pb-3 border-b w-full min-w-0">
-                            <div className="space-y-1 w-full min-w-0">
-                              <h4 className="font-medium text-xs leading-snug break-words group-hover:text-primary transition-colors">
-                                {courseName}
-                              </h4>
+                        <div className="flex-1 pb-6 min-w-0 overflow-hidden">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b w-full min-w-0">
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                                <h4 className="font-medium text-sm leading-snug break-words group-hover:text-primary transition-colors max-w-full">
+                                  {courseName}
+                                </h4>
 
-                              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground/80">
-                                <span className="font-medium text-muted-foreground flex items-center">
+                                {isActive && (
+                                  <Badge
+                                    variant="ghost"
+                                    className="text-[10px] font-medium gap-1 shrink-0 text-primary"
+                                  >
+                                    <Radio className="h-3 w-3 animate-ping text-primary" />
+                                    Sedang Berlangsung
+                                  </Badge>
+                                )}
+
+                                {isConflict && (
+                                  <Badge
+                                    variant="destructive"
+                                    className="text-[10px] font-medium gap-1 animate-pulse shrink-0 max-w-xs truncate"
+                                    title={`Bentrok dengan${conflictDetail}`}
+                                  >
+                                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">
+                                      Bentrok{conflictDetail}
+                                    </span>
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground/80">
+                                <span className="font-medium text-muted-foreground">
                                   <Monitor className="h-3 w-3 inline-block mr-1" />
-                                  {roomName}
+                                  Ruang {roomName}
                                 </span>
                                 {item.prodi && (
                                   <>
                                     <span>&bull;</span>
-                                    <span className="truncate max-w-[100px]">{item.prodi}</span>
+                                    <span>{item.prodi}</span>
                                   </>
                                 )}
                               </div>
                             </div>
 
-                            <div className="flex items-center justify-between gap-2 pt-1">
+                            <div className="flex items-center justify-between md:justify-end gap-3 shrink-0">
                               <span
                                 className={cn(
-                                  "text-[10px] font-mono px-2 py-0.5 rounded font-medium border shrink-0",
+                                  "text-xs font-mono px-2.5 py-1 rounded-md font-medium border",
                                   isActive
-                                    ? "bg-primary text-white border-primary"
+                                    ? "bg-primary text-white"
                                     : isConflict
-                                      ? "bg-rose-600 text-white border-rose-600"
-                                      : "text-muted-foreground bg-muted",
+                                      ? "bg-rose-600 text-white"
+                                      : "text-muted-foreground",
                                 )}
                               >
                                 {startTime} - {endTime}
                               </span>
 
                               {isAdmin && (
-                                <div className="flex items-center gap-1 shrink-0">
+                                <div className="flex items-center gap-1">
                                   <EditScheduleDialog
                                     schedule={item}
                                     onSuccess={onReloadSchedules}
@@ -203,42 +227,17 @@ export function ScheduleTimeline({
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6 text-rose-400 hover:text-rose-500 hover:bg-rose-950/20 rounded"
+                                    className="h-8 w-8 text-rose-400 hover:text-rose-500 hover:bg-rose-950/20 rounded-lg"
                                     onClick={() =>
                                       onDeleteClick(item.id, courseName)
                                     }
                                     title="Hapus Jadwal"
                                   >
-                                    <Trash2 className="h-3 w-3" />
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
                               )}
                             </div>
-
-                            {(isActive || isConflict) && (
-                              <div className="flex flex-wrap gap-1 pt-0.5">
-                                {isActive && (
-                                  <Badge
-                                    variant="ghost"
-                                    className="text-[9px] h-4 px-1 font-medium gap-1 text-primary bg-primary/10"
-                                  >
-                                    <Radio className="h-2 w-2 animate-ping text-primary" />
-                                    Berlangsung
-                                  </Badge>
-                                )}
-
-                                {isConflict && (
-                                  <Badge
-                                    variant="destructive"
-                                    className="text-[9px] h-4 px-1 font-medium gap-1 animate-pulse truncate max-w-full"
-                                    title={`Bentrok dengan${conflictDetail}`}
-                                  >
-                                    <AlertTriangle className="h-2 w-2 shrink-0" />
-                                    <span className="truncate">Bentrok{conflictDetail}</span>
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>

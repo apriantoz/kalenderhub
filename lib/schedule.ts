@@ -25,8 +25,7 @@ export const DAYS_OF_WEEK = [
   "Rabu",
   "Kamis",
   "Jumat",
-  "Sabtu",
-  "Minggu"
+
 ];
 
 /**
