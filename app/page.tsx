@@ -1,5 +1,5 @@
-import ScheduleMain from "@/components/ScheduleMain";
+import HomePage from "./home/page";
 
 export default function Page() {
-  return <ScheduleMain />;
+  return <HomePage/>;
 }

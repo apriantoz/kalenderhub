@@ -114,8 +114,8 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                     key={room}
                     className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between bg-card ${
                       activeSchedule
-                        ? "border-primary/40 bg-primary/5 shadow-xs"
-                        : "border-border/80 hover:border-primary/30"
+                        ? "bg-primary/20 shadow-xs"
+                        : "bg-muted shadow-xs"
                     }`}
                   >
                     <div>
@@ -149,7 +149,7 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                       </div>
 
                       {activeSchedule ? (
-                        <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 space-y-1">
+                        <div className="p-2.5 rounded-lg bg-primary/10 space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-[9px] uppercase font-mono tracking-wider text-primary font-bold">
                               Sedang Berlangsung
@@ -168,8 +168,8 @@ export function LiveLabMonitor({ schedules }: LiveLabMonitorProps) {
                           </span>
                         </div>
                       ) : upcomingSchedule ? (
-                        <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60 space-y-0.5">
-                          <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                        <div className="p-2.5 rounded-lg bg-amber-600/20 space-y-0.5">
+                          <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 bg-amber font-semibold">
                             <AlertCircle className="h-3 w-3" />
                             <span>
                               Berikutnya ({upcomingSchedule.start_time} WITA):

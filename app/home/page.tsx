@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ModeToggle } from "@/components/ModeTogle";
 
 export default function HomePage() {
   return (
@@ -17,17 +18,23 @@ export default function HomePage() {
 
       {/* Header Minimalis (Opsional, untuk kerapian layout atas) */}
       <header className="relative z-10 w-full max-w-6xl px-6 py-6 flex justify-between items-center">
-        <div className="font-bold text-xl tracking-tight flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-primary inline-block"></span>
-          KalenderHub
-        </div>
+      {/* Sisi Kiri: Logo */}
+      <div className="font-bold text-xl tracking-tight flex items-center gap-2">
+        <span className="w-3 h-3 rounded-full bg-primary inline-block"></span>
+        KalenderHub
+      </div>
+
+      {/* Sisi Kanan: Tombol Masuk & Mode Toggle dibungkus dalam satu flex container */}
+      <div className="flex items-center gap-4">
         <Link
           href="/login"
-          className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+          className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
         >
           Masuk
         </Link>
-      </header>
+        <ModeToggle/>
+      </div>
+    </header>
 
       {/* 3. Hero Content (Tepat di Tengah Layar) */}
       <section className="relative z-10 flex-1 w-full max-w-4xl flex flex-col items-center justify-center text-center px-6 gap-6">
@@ -50,7 +57,7 @@ export default function HomePage() {
         {/* Tombol Aksi (CTA) */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
           <Link
-            href="/"
+            href="/schedule"
             className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-medium text-lg shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
           >
             Lihat Jadwal
