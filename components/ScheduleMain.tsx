@@ -28,6 +28,7 @@ import { Calendar1Icon, InfoIcon, TrendingUpIcon } from "lucide-react";
 import { toast } from "sonner";
 import {Card} from "@/components/ui/card"
 import { Navbar } from "./Navbar";
+import { LabStatusBanner } from "./LabStatusBanner";
 
 export default function ScheduleMain() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -227,6 +228,7 @@ export default function ScheduleMain() {
                 </div>
               ) : (
                 <div className="w-full my-4 space-y-4">
+                  <LabStatusBanner/>
                   <ScheduleFilterBar
                     selectedProdi={selectedProdi}
                     selectedRoom={selectedRoom}

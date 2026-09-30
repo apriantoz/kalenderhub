@@ -9,6 +9,8 @@ export interface Session {
   lecturer?: string;
   prodi?: string;
   semester?: number;
+  term_type?: string;     // <-- Tambahan baru: Jenis Semester (Gasal / Genap)
+  academic_year?: string; // <-- Tambahan baru: Tahun Ajaran (Contoh: 2025/2026)
   day: string;
   startTime?: string;
   start_time?: string;
@@ -25,7 +27,8 @@ export const DAYS_OF_WEEK = [
   "Rabu",
   "Kamis",
   "Jumat",
-
+  "Sabtu",
+  "Minggu"
 ];
 
 /**

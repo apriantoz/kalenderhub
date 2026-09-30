@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Calendar1Icon, LogIn, LogOut } from "lucide-react";
+import { Calendar1Icon, LogIn, LogOut, Settings } from "lucide-react";
 import { ModeToggle } from "@/components/ModeTogle"; // Sesuaikan path import ModeToggle Anda
 import { AddScheduleDialog } from "@/components/add-schedule-dialog"; // Sesuaikan path-nya
 import { AdminMessageDialog } from "@/components/AdminMessage"; // Sesuaikan path-nya
@@ -34,6 +34,12 @@ export function Navbar({ isAdmin, onReloadSchedules, onLogout }: NavbarProps) {
         <div className="flex items-center flex-wrap gap-3">
           {isAdmin ? (
             <>
+              {/* Tombol pintasan ke halaman panel admin */}
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  <Settings className="mr-1.5 h-4 w-4 text-primary" /> Panel Admin
+                </Button>
+              </Link>
               <AddScheduleDialog onSuccess={onReloadSchedules} />
               <Button variant="outline" size="sm" onClick={onLogout}>
                 <LogOut className="mr-1.5 h-4 w-4 text-primary" /> Logout

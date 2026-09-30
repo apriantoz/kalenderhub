@@ -39,6 +39,39 @@ import {
   ComboboxList,
 } from "./ui/combobox";
 
+// Helper Default Otomatis Berdasarkan Bulan & Tahun Saat Ini
+const getDefaultAcademicInfo = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; 
+
+  let term = "Gasal";
+  let academicYear = `${year}/${year + 1}`;
+
+  // Januari - Juni masuk Semester Genap tahun ajaran sebelumnya/tahun berjalan
+  if (month >= 1 && month <= 6) {
+    term = "Genap";
+    academicYear = `${year - 1}/${year}`;
+  }
+
+  return { term, academicYear };
+};
+
+// Fungsi helper untuk mengambil initial value dengan aman (SSR / Client check)
+const getInitialTermType = () => {
+  if (typeof window === "undefined") return "Gasal";
+  const savedTerm = localStorage.getItem("admin_active_term");
+  if (savedTerm) return savedTerm;
+  return getDefaultAcademicInfo().term;
+};
+
+const getInitialAcademicYear = () => {
+  if (typeof window === "undefined") return "2025/2026";
+  const savedYear = localStorage.getItem("admin_active_academic_year");
+  if (savedYear) return savedYear;
+  return getDefaultAcademicInfo().academicYear;
+};
+
 interface AddScheduleDialogProps {
   onSuccess: () => void;
 }
@@ -49,26 +82,41 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // State Form (Menggunakan lazy initial state untuk menghindari useEffect setState)
   const [courseName, setCourseName] = useState("");
   const [prodi, setProdi] = useState<string>("");
   const [semester, setSemester] = useState<string>("");
+  const [termType, setTermType] = useState<string>(getInitialTermType);
+  const [academicYear, setAcademicYear] = useState<string>(getInitialAcademicYear);
   const [day, setDay] = useState(DAYS_OF_WEEK[0]);
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("10:00");
   const [room, setRoom] = useState<string>(LAB_ROOMS[0]);
+
+  // Handle ketika dialog dibuka (jika ingin merefresh nilai dari localStorage saat dialog dibuka kembali)
+  const handleOpenChange = (val: boolean) => {
+    setOpen(val);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    
+    if (val) {
+      setTermType(getInitialTermType());
+      setAcademicYear(getInitialAcademicYear());
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    // 1. Validasi field kosong
-    if (!courseName || !prodi || !room || !semester) {
+    // Validasi field kosong
+    if (!courseName || !prodi || !room || !semester || !termType || !academicYear) {
       setErrorMsg("Semua field wajib diisi, bosku!");
       return;
     }
 
-    // 2. Validasi tambahan: Jam selesai harus setelah jam mulai
+    // Validasi jam
     if (startTime >= endTime) {
       setErrorMsg("Jam selesai harus lebih besar dari jam mulai, bosku!");
       return;
@@ -80,6 +128,8 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
         course_name: courseName,
         prodi,
         semester: Number(semester),
+        term_type: termType,
+        academic_year: academicYear,
         day,
         start_time: startTime,
         end_time: endTime,
@@ -106,20 +156,13 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(val) => {
-        setOpen(val);
-        setErrorMsg(null);
-        setSuccessMsg(null);
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         className={buttonVariants({ size: "sm" }) + " gap-2"}
       >
         <Plus className="h-4 w-4" /> Tambah Jadwal
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-112.5">
         <DialogHeader>
           <DialogTitle>Tambah Jadwal Perkuliahan</DialogTitle>
         </DialogHeader>
@@ -192,6 +235,35 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
+            </div>
+          </div>
+
+          {/* Jenis Semester & Tahun Ajaran */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="term_type">Jenis Semester</Label>
+              <Select
+                value={termType}
+                onValueChange={(val) => setTermType(val ?? "Gasal")}
+              >
+                <SelectTrigger id="term_type" className="w-full">
+                  <SelectValue placeholder="Pilih Jenis" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Gasal">Gasal</SelectItem>
+                  <SelectItem value="Genap">Genap</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="academic_year">Tahun Ajaran</Label>
+              <Input
+                id="academic_year"
+                placeholder="Contoh: 2025/2026"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+              />
             </div>
           </div>
 

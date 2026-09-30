@@ -35,7 +35,7 @@ import {
 } from "./ui/combobox";
 
 interface EditScheduleDialogProps {
-  schedule: Schedule;
+  schedule: Schedule & { term_type?: string; academic_year?: string };
   onSuccess: () => void;
 }
 
@@ -51,6 +51,8 @@ export function EditScheduleDialog({
   const [courseName, setCourseName] = useState(schedule?.course_name || schedule?.courseName || "");
   const [prodi, setProdi] = useState(schedule?.prodi || "");
   const [semester, setSemester] = useState(String(schedule?.semester ?? SEMESTERS[0]));
+  const [termType, setTermType] = useState(schedule?.term_type || "Gasal");
+  const [academicYear, setAcademicYear] = useState(schedule?.academic_year || "2025/2026");
   const [day, setDay] = useState(schedule?.day || DAYS_OF_WEEK[0]);
   const [startTime, setStartTime] = useState(schedule?.start_time || schedule?.startTime || "08:00");
   const [endTime, setEndTime] = useState(schedule?.end_time || schedule?.endTime || "10:00");
@@ -61,7 +63,7 @@ export function EditScheduleDialog({
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!courseName || !prodi || !room || !semester) {
+    if (!courseName || !prodi || !room || !semester || !termType || !academicYear) {
       setErrorMsg("Semua field wajib diisi, bosku!");
       return;
     }
@@ -79,6 +81,8 @@ export function EditScheduleDialog({
         course_name: courseName,
         prodi,
         semester: Number(semester),
+        term_type: termType,
+        academic_year: academicYear,
         day,
         start_time: startTime,
         end_time: endTime,
@@ -113,6 +117,8 @@ export function EditScheduleDialog({
           setCourseName(schedule.course_name || schedule.courseName || "");
           setProdi(schedule.prodi || "");
           setSemester(String(schedule.semester ?? SEMESTERS[0]));
+          setTermType(schedule.term_type || "Gasal");
+          setAcademicYear(schedule.academic_year || "2025/2026");
           setDay(schedule.day || DAYS_OF_WEEK[0]);
           setStartTime(schedule.start_time || schedule.startTime || "08:00");
           setEndTime(schedule.end_time || schedule.endTime || "10:00");
@@ -120,7 +126,6 @@ export function EditScheduleDialog({
         }
       }}
     >
-      {/* Menggunakan pola render dari referensi Shadcn UI terbaru Anda */}
       <DialogTrigger
         render={
           <Button
@@ -134,7 +139,7 @@ export function EditScheduleDialog({
         }
       />
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-112.5">
         <DialogHeader>
           <DialogTitle>Edit Jadwal Perkuliahan</DialogTitle>
         </DialogHeader>
@@ -203,6 +208,36 @@ export function EditScheduleDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* Baris Baru: Jenis Semester & Tahun Ajaran */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="edit_term_type">Jenis Semester</Label>
+              <Select
+                value={termType}
+                onValueChange={(val) => setTermType(val ?? "Gasal")}
+              >
+                <SelectTrigger id="edit_term_type" className="w-full">
+                  <SelectValue placeholder="Pilih Jenis" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Gasal">Gasal</SelectItem>
+                  <SelectItem value="Genap">Genap</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit_academic_year">Tahun Ajaran</Label>
+              <Input
+                id="edit_academic_year"
+                placeholder="Contoh: 2025/2026"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+                required
+              />
             </div>
           </div>
 
