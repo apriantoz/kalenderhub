@@ -172,10 +172,10 @@ export default function AdminDashboardPage() {
 
         {/* Tab 2: Akademik & Konfigurasi Sistem */}
         <TabsContent value="academic" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <AcademicSettingsCard />
 
-            <Card>
+            <Card className="w-full">
               <CardHeader className="border-b pb-4 flex flex-row items-center gap-2">
                 <Info className="h-5 w-5 text-primary" />
                 <CardTitle className="text-base font-semibold">

@@ -80,7 +80,7 @@ export function AcademicSettingsCard() {
   }
 
   return (
-    <Card className="w-full max-w-xl">
+    <Card className="w-full">
       <CardHeader className="flex flex-row items-center gap-2 pb-4 border-b">
         <Settings className="h-5 w-5 text-primary" />
         <CardTitle className="text-base font-semibold">Pengaturan Periode Akademik</CardTitle>
