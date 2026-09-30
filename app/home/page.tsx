@@ -1,42 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ModeToggle } from "@/components/ModeTogle";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const turnstileRef = useRef<TurnstileInstance>(null);
-
-  const handleOpenSchedule = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsOpen(true);
-  };
-
-  const handleVerifySuccess = () => {
-    setErrorMessage("");
-    setIsLoading(true);
-
-    setTimeout(() => {
-      router.push("/schedule");
-    }, 600);
-  };
-
   return (
     <main className="relative min-h-screen w-full flex flex-col justify-between items-center overflow-hidden">
       {/* 1. Dot Matrix Background */}
@@ -84,8 +51,9 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
-          <button
-            onClick={handleOpenSchedule}
+          {/* DIUBAH MENJADI LINK NEXT.JS */}
+          <Link
+            href="/schedule"
             className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-medium text-lg shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
           >
             Lihat Jadwal
@@ -102,7 +70,7 @@ export default function HomePage() {
                 d="M13 7l5 5m0 0l-5 5m5-5H6"
               />
             </svg>
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -110,49 +78,6 @@ export default function HomePage() {
       <footer className="relative z-10 w-full py-6 text-center text-xs text-gray-400 border-t">
         &copy; {new Date().getFullYear()} Kalender Hub. All rights reserved.
       </footer>
-
-      {/* --- SHADCN DIALOG TURNSTILE --- */}
-      <Dialog
-        open={isOpen}
-        onOpenChange={(open) => {
-          setIsOpen(open);
-          if (!open) {
-            setIsLoading(false);
-            setErrorMessage("");
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Verifikasi Keamanan</DialogTitle>
-            <DialogDescription>
-              Sedang melakukan verifikasi
-            </DialogDescription>
-          </DialogHeader>
-
-          {errorMessage && (
-            <p className="text-xs text-destructive text-center">{errorMessage}</p>
-          )}
-
-          {/* Widget Turnstile */}
-          <div className="flex justify-center my-2">
-            <Turnstile
-              ref={turnstileRef}
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
-              onSuccess={handleVerifySuccess}
-              onExpire={() => {}}
-              onError={() => setErrorMessage("Verifikasi keamanan gagal dimuat.")}
-              options={{ theme: "auto" }}
-            />
-          </div>
-
-          {isLoading && (
-            <p className="text-xs text-primary font-medium text-center animate-pulse">
-              Verifikasi berhasil! Mengalihkan ke jadwal...
-            </p>
-          )}
-        </DialogContent>
-      </Dialog>
     </main>
   );
 }
