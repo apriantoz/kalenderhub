@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Wrench, Calendar, Trash2, PlusCircle, BookmarkCheck } from "lucide-react";
+import { Wrench, Calendar, Trash2, PlusCircle, BookmarkCheck, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -28,12 +28,14 @@ interface MaintenanceItem {
 }
 
 export function LabMaintenanceCard() {
+  const getTodayString = () => new Date().toISOString().split("T")[0];
+
   const [maintenances, setMaintenances] = useState<MaintenanceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [roomName, setRoomName] = useState("");
-  const [category, setCategory] = useState("event"); // Default ke Kegiatan Internal
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [category, setCategory] = useState("event");
+  const [startDate, setStartDate] = useState(getTodayString);
+  const [endDate, setEndDate] = useState(getTodayString);
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -72,9 +74,16 @@ export function LabMaintenanceCard() {
     }
   };
 
+  const handleStartDateChange = (val: string) => {
+    setStartDate(val);
+    if (endDate < val) {
+      setEndDate(val);
+    }
+  };
+
   const handleAddMaintenance = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName || !startDate || !endDate || !reason) {
+    if (!roomName || !startDate || !endDate || !reason.trim()) {
       toast.error("Semua field wajib diisi!");
       return;
     }
@@ -85,7 +94,7 @@ export function LabMaintenanceCard() {
       category,
       start_date: startDate,
       end_date: endDate,
-      reason,
+      reason: reason.trim(),
     });
 
     if (error) {
@@ -97,9 +106,11 @@ export function LabMaintenanceCard() {
           : `Lab ${roomName} berhasil dimasukkan ke Mode Pemeliharaan.`
       );
       setRoomName("");
-      setStartDate("");
-      setEndDate("");
       setReason("");
+      setCategory("event");
+      const today = getTodayString();
+      setStartDate(today);
+      setEndDate(today);
       refreshMaintenances();
     }
     setSubmitting(false);
@@ -115,6 +126,8 @@ export function LabMaintenanceCard() {
     }
   };
 
+  const isEvent = category === "event";
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center gap-2 pb-4 border-b">
@@ -125,35 +138,50 @@ export function LabMaintenanceCard() {
       </CardHeader>
 
       <CardContent className="space-y-6 pt-4">
-        {/* Form Tambah Kegiatan/Maintenance */}
+        {/* Form Input Reservasi / Maintenance */}
         <form onSubmit={handleAddMaintenance} className="space-y-4 p-4 bg-muted/40 rounded-xl border">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <PlusCircle className="h-3.5 w-3.5" /> Reservasi Khusus / Pemeliharaan Lab
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <PlusCircle className="h-3.5 w-3.5 text-primary" /> Form Reservasi Khusus / Maintenance
+            </h4>
+            <Badge variant="secondary" className="text-[10px] font-mono">
+              12 Lab Ready
+            </Badge>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Tipe Reservasi</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Tipe Reservasi */}
+            <div className="space-y-1.5">
+              <Label htmlFor="category" className="text-xs font-medium">
+                Tipe Reservasi
+              </Label>
               <Select value={category} onValueChange={(val) => setCategory(val ?? "event")}>
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" className="h-9 w-full text-xs bg-background">
                   <SelectValue placeholder="Pilih Tipe" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="event">📅 Kegiatan Internal / Acara Kampus</SelectItem>
-                  <SelectItem value="maintenance">🛠️ Perbaikan / Maintenance Hardware</SelectItem>
+                  <SelectItem value="event" className="text-xs">
+                    📅 Kegiatan Internal / Acara Kampus
+                  </SelectItem>
+                  <SelectItem value="maintenance" className="text-xs">
+                    🛠️ Perbaikan / Maintenance Hardware
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="room_name">Pilih Ruangan Lab</Label>
+            {/* Pilih Ruangan Lab */}
+            <div className="space-y-1.5">
+              <Label htmlFor="room_name" className="text-xs font-medium">
+                Pilih Ruangan Lab
+              </Label>
               <Select value={roomName} onValueChange={(val) => setRoomName(val ?? "")}>
-                <SelectTrigger id="room_name">
+                <SelectTrigger id="room_name" className="h-9 w-full text-xs bg-background">
                   <SelectValue placeholder="Pilih Lab Desain Hub" />
                 </SelectTrigger>
                 <SelectContent>
                   {LAB_ROOMS.map((room) => (
-                    <SelectItem key={room} value={room}>
+                    <SelectItem key={room} value={room} className="text-xs">
                       {room}
                     </SelectItem>
                   ))}
@@ -161,45 +189,68 @@ export function LabMaintenanceCard() {
               </Select>
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="reason">Nama Kegiatan / Alasan Kunci Lab</Label>
+            {/* Nama Kegiatan / Alasan */}
+            <div className="space-y-1.5">
+              <Label htmlFor="reason" className="text-xs font-medium">
+                Nama Kegiatan / Alasan
+              </Label>
               <Input
                 id="reason"
+                className="h-9 text-xs bg-background"
                 placeholder={
-                  category === "event"
-                    ? "Contoh: Workshop Animasi 3D / Pelatihan LSP"
-                    : "Contoh: Perbaikan AC & Instalasi Software"
+                  isEvent
+                    ? "E.g. Workshop Animasi 3D / LSP"
+                    : "E.g. Perbaikan AC / Install PC"
                 }
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="start_date">Mulai Tanggal</Label>
+            {/* Tanggal Mulai */}
+            <div className="space-y-1.5">
+              <Label htmlFor="start_date" className="text-xs font-medium flex items-center gap-1">
+                <CalendarDays className="h-3 w-3 text-muted-foreground" /> Mulai Tanggal
+              </Label>
               <Input
                 id="start_date"
                 type="date"
+                className="h-9 text-xs bg-background"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => handleStartDateChange(e.target.value)}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="end_date">Sampai Tanggal</Label>
+            {/* Tanggal Selesai */}
+            <div className="space-y-1.5">
+              <Label htmlFor="end_date" className="text-xs font-medium flex items-center gap-1">
+                <CalendarDays className="h-3 w-3 text-muted-foreground" /> Sampai Tanggal
+              </Label>
               <Input
                 id="end_date"
                 type="date"
+                min={startDate}
+                className="h-9 text-xs bg-background"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
-          </div>
 
-          <div className="flex justify-end pt-2">
-            <Button type="submit" size="sm" disabled={submitting}>
-              {submitting ? "Menyimpan..." : "Kunci Ruangan"}
-            </Button>
+            {/* Tombol Submit */}
+            <div className="flex items-end justify-end">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={submitting}
+                className={`w-full h-9 text-xs font-medium ${
+                  isEvent
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-amber-600 hover:bg-amber-700 text-white"
+                }`}
+              >
+                {submitting ? "Menyimpan..." : isEvent ? "Kunci untuk Acara" : "Kunci Maintenance"}
+              </Button>
+            </div>
           </div>
         </form>
 
@@ -220,13 +271,13 @@ export function LabMaintenanceCard() {
           ) : (
             <div className="space-y-2">
               {maintenances.map((item) => {
-                const isEvent = item.category === "event";
+                const itemIsEvent = item.category === "event";
 
                 return (
                   <div
                     key={item.id}
                     className={`flex items-center justify-between p-3 rounded-lg border text-xs ${
-                      isEvent
+                      itemIsEvent
                         ? "bg-blue-500/5 border-blue-500/20"
                         : "bg-amber-500/5 border-amber-500/20"
                     }`}
@@ -236,12 +287,12 @@ export function LabMaintenanceCard() {
                         <Badge
                           variant="outline"
                           className={
-                            isEvent
+                            itemIsEvent
                               ? "border-blue-500 text-blue-600 dark:text-blue-400 font-semibold"
                               : "border-amber-500 text-amber-600 dark:text-amber-400 font-semibold"
                           }
                         >
-                          {isEvent ? (
+                          {itemIsEvent ? (
                             <Calendar className="h-3 w-3 mr-1" />
                           ) : (
                             <Wrench className="h-3 w-3 mr-1" />

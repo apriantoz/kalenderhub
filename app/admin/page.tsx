@@ -155,8 +155,8 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Navigasi Tab Utama Panel Admin */}
-      <Tabs defaultValue="maintenance" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[420px] h-11 p-1">
+      <Tabs defaultValue="maintenance" className="w-full">
+        <TabsList variant="default" className="grid w-full grid-cols-2 lg:w-[420px] h-11 p-1">
           <TabsTrigger value="maintenance" className="gap-2 text-xs font-medium">
             <Wrench className="h-4 w-4" /> Pemeliharaan Lab
           </TabsTrigger>
