@@ -410,7 +410,7 @@ export function StudyProgramManagerCard() {
                               <SelectContent>
                                 {studyPrograms.map((p) => (
                                   <SelectItem key={p.id} value={p.code}>
-                                    {p.code}
+                                    {p.name} - {p.code}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -684,7 +684,7 @@ export function StudyProgramManagerCard() {
                     <SelectContent>
                       {studyPrograms.map((p) => (
                         <SelectItem key={p.id} value={p.code}>
-                          {p.code}
+                          {p.name} - {p.code}
                         </SelectItem>
                       ))}
                     </SelectContent>

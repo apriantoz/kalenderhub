@@ -23,22 +23,41 @@ const sortScheduleData = (data: Schedule[]): Schedule[] => {
     const dayB = dayOrder[b.day || ''] || 99;
     if (dayA !== dayB) return dayA - dayB;
 
-    // 2. Jika hari sama, urutkan berdasarkan Jam Mulai (start_time)
-    const timeA = a.start_time || '';
-    const timeB = b.start_time || '';
+    // 2. Jika hari sama, urutkan berdasarkan Jam Mulai
+    const timeA = a.start_time || a.startTime || '';
+    const timeB = b.start_time || b.startTime || '';
     if (timeA !== timeB) {
       return timeA.localeCompare(timeB);
     }
 
     // 3. Jika jam sama, urutkan berdasarkan Ruangan
-    const roomA = a.room || '';
-    const roomB = b.room || '';
+    const roomA = a.room || a.labName || '';
+    const roomB = b.room || b.labName || '';
     return roomA.localeCompare(roomB);
   });
 };
 
+// Helper untuk mengambil nama mata kuliah dari struktur relasi courses
+const getCourseName = (item: Schedule): string => {
+  return (
+    item.courses?.name ||     // Dari relasi objek courses.name (hasil JOIN Supabase)
+    item.course_name ||       // Fallback properti flat lama
+    item.courseName ||        
+    '-'
+  );
+};
+
+// Helper untuk mengambil kode program studi dari struktur relasi courses
+const getProdiCode = (item: Schedule): string => {
+  return (
+    item.courses?.prodi_code || // Dari relasi objek courses.prodi_code (hasil JOIN Supabase)
+    item.prodi ||               // Fallback properti flat lama
+    '-'
+  );
+};
+
 // ==========================================
-// 1. Export Ke Excel (.xlsx) - Hari yang sama di-merge (digabung)
+// 1. Export Ke Excel (.xlsx)
 // ==========================================
 export const exportToExcel = async (
   data: Schedule[],
@@ -63,12 +82,12 @@ export const exportToExcel = async (
   headerRow.fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: '1E293B' },
+    fgColor: { argb: '1E293B' }, // Slate 800
   };
   headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
   let currentDay = '';
-  let startRowForMerge = 2; // Baris awal data setelah header
+  let startRowForMerge = 2;
 
   sortedData.forEach((item, index) => {
     const dayValue = item.day || '-';
@@ -77,39 +96,33 @@ export const exportToExcel = async (
     worksheet.addRow({
       no: index + 1,
       day: dayValue,
-      time: `${item.start_time || ''} - ${item.end_time || ''}`,
-      room: item.room || '-',
-      course_name: item.course_name || '-',
-      prodi: item.prodi || '-',
+      time: `${item.start_time || item.startTime || ''} - ${item.end_time || item.endTime || ''}`,
+      room: item.room || item.labName || '-',
+      course_name: getCourseName(item),
+      prodi: getProdiCode(item),
     });
 
-    // Styling baris data
     const row = worksheet.getRow(rowIndex);
     row.alignment = { vertical: 'middle' };
 
-    // Logika untuk menggabungkan (merge) sel hari yang sama secara vertikal
     if (dayValue !== currentDay) {
       if (index > 0 && rowIndex - 1 > startRowForMerge) {
-        // Merge hari sebelumnya yang berulang
         worksheet.mergeCells(startRowForMerge, 2, rowIndex - 1, 2);
       }
       currentDay = dayValue;
       startRowForMerge = rowIndex;
     }
 
-    // Jika ini adalah baris terakhir, lakukan merge sisa hari terakhir
     if (index === sortedData.length - 1 && rowIndex > startRowForMerge) {
       worksheet.mergeCells(startRowForMerge, 2, rowIndex, 2);
     }
   });
 
-  // Ratakan teks kolom tertentu
   worksheet.getColumn('no').alignment = { horizontal: 'center', vertical: 'middle' };
   worksheet.getColumn('day').alignment = { horizontal: 'center', vertical: 'middle' };
   worksheet.getColumn('time').alignment = { horizontal: 'center', vertical: 'middle' };
 
-  // Tambahkan border tipis ke seluruh sel agar rapi
-  worksheet.eachRow((row, rowNumber) => {
+  worksheet.eachRow((row) => {
     row.eachCell((cell) => {
       cell.border = {
         top: { style: 'thin', color: { argb: 'CBD5E1' } },
@@ -125,121 +138,79 @@ export const exportToExcel = async (
 };
 
 // ==========================================
-
-// 2. Export Ke PDF (.pdf) - Menggunakan jsPDF
-
+// 2. Export Ke PDF (.pdf)
 // ==========================================
-
 export const exportToPDF = (
   data: Schedule[],
-
-  fileName = "Rekap_Jadwal_Lab.pdf",
+  fileName = 'Rekap_Jadwal_Lab.pdf'
 ): void => {
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const sortedData = sortScheduleData(data);
 
   doc.setFontSize(16);
-
-  doc.setFont("helvetica", "bold");
-
-  doc.text("REKAPITULASI JADWAL LABORATORIUM KOMPUTER", 14, 15);
+  doc.setFont('helvetica', 'bold');
+  doc.text('REKAPITULASI JADWAL LABORATORIUM KOMPUTER', 14, 15);
 
   doc.setFontSize(9);
-
-  doc.setFont("helvetica", "normal");
-
+  doc.setFont('helvetica', 'normal');
   doc.text(
-    `Dicetak pada: ${new Date().toLocaleDateString("id-ID", {
-      day: "numeric",
-
-      month: "long",
-
-      year: "numeric",
-
-      hour: "2-digit",
-
-      minute: "2-digit",
+    `Dicetak pada: ${new Date().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })}`,
-
     14,
-
-    21,
+    21
   );
 
   const tableColumn = [
-    "No",
-    "Hari",
-    "Jam",
-    "Ruangan",
-    "Mata Kuliah",
-    "Program Studi",
+    'No',
+    'Hari',
+    'Jam',
+    'Ruangan',
+    'Mata Kuliah',
+    'Program Studi',
   ];
-
-  // Memastikan tipe data bersih dari undefined (diberi fallback string kosong)
 
   const tableRows = sortedData.map((item, index) => [
     index + 1,
-
-    item.day || "-",
-
-    `${item.start_time || ""} - ${item.end_time || ""}`,
-
-    item.room || "-",
-
-    item.course_name || "-",
-
-    item.prodi || "-",
+    item.day || '-',
+    `${item.start_time || item.startTime || ''} - ${item.end_time || item.endTime || ''}`,
+    item.room || item.labName || '-',
+    getCourseName(item),
+    getProdiCode(item),
   ]);
 
   autoTable(doc, {
     head: [tableColumn],
-
     body: tableRows,
-
     startY: 25,
-
-    theme: "grid",
-
-    styles: { fontSize: 8.5, cellPadding: 3, font: "helvetica" },
-
+    theme: 'grid',
+    styles: { fontSize: 8.5, cellPadding: 3, font: 'helvetica' },
     headStyles: {
       fillColor: [30, 41, 59], // Slate 800
-
       textColor: [255, 255, 255],
-
-      fontStyle: "bold",
-
-      halign: "center",
+      fontStyle: 'bold',
+      halign: 'center',
     },
-
     columnStyles: {
-      0: { halign: "center", cellWidth: 12 }, // No
-
-      1: { cellWidth: 25 }, // Hari
-
-      2: { halign: "center", cellWidth: 35 }, // Jam
-
-      3: { cellWidth: 40 }, // Ruangan
+      0: { halign: 'center', cellWidth: 12 }, // No
+      1: { cellWidth: 25 },                   // Hari
+      2: { halign: 'center', cellWidth: 35 }, // Jam
+      3: { cellWidth: 40 },                   // Ruangan
     },
-
     alternateRowStyles: { fillColor: [248, 250, 252] },
-
     didDrawPage: (dataArg) => {
       const pageCount = doc.getNumberOfPages();
-
       doc.setFontSize(8);
-
       doc.setTextColor(100);
-
       doc.text(
         `Halaman ${dataArg.pageNumber} dari ${pageCount}`,
-
         doc.internal.pageSize.width - 20,
-
         doc.internal.pageSize.height - 10,
-
-        { align: "right" },
+        { align: 'right' },
       );
     },
   });
