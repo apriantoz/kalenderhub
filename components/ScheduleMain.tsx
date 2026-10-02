@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { LiveLabMonitor } from "@/components/live-lab-monitor";
 import { getConflictingScheduleIds, Schedule } from "@/lib/schedule";
-import { ScheduleHeader } from "@/components/ScheduleHeader";
 import { ScheduleFilterBar } from "@/components/ScheduleFilterBar";
 import { ScheduleTimeline } from "@/components/ScheduleTimeline";
 import { ScheduleSkeleton } from "@/components/ScheduleSkeleton";
@@ -26,12 +25,19 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar1Icon, InfoIcon, TrendingUpIcon } from "lucide-react";
 import { toast } from "sonner";
-import {Card} from "@/components/ui/card"
+import { Card } from "@/components/ui/card";
 import { Navbar } from "./Navbar";
 import { LabStatusBanner } from "./LabStatusBanner";
 
+export interface StudyProgram {
+  id: string;
+  code: string;
+  name: string;
+}
+
 export default function ScheduleMain() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [, setNow] = useState(() => new Date());
@@ -53,15 +59,30 @@ export default function ScheduleMain() {
   }, []);
 
   const reloadSchedules = async () => {
-    const { data, error } = await supabase
+    const { data: schedulesData, error: schedulesError } = await supabase
       .from("schedules")
-      .select("*")
+      .select(`
+        *,
+        courses (
+          id,
+          code,
+          name,
+          sks,
+          prodi_code,
+          semester
+        )
+      `)
       .order("start_time", { ascending: true });
 
-    if (error) {
-      toast.error("Gagal memuat ulang data jadwal.");
+    const { data: prodiData, error: prodiError } = await supabase
+      .from("study_programs")
+      .select("*");
+
+    if (schedulesError || prodiError) {
+      toast.error("Gagal memuat ulang data sistem.");
     } else {
-      setSchedules(data || []);
+      setSchedules(schedulesData || []);
+      setStudyPrograms(prodiData || []);
     }
   };
 
@@ -74,16 +95,31 @@ export default function ScheduleMain() {
       } = await supabase.auth.getSession();
       if (!ignore) setIsAdmin(!!session);
 
-      const { data, error } = await supabase
+      const { data: schedulesData, error: schedulesError } = await supabase
         .from("schedules")
-        .select("*")
+        .select(`
+          *,
+          courses (
+            id,
+            code,
+            name,
+            sks,
+            prodi_code,
+            semester
+          )
+        `)
         .order("start_time", { ascending: true });
 
+      const { data: prodiData, error: prodiError } = await supabase
+        .from("study_programs")
+        .select("*");
+
       if (!ignore) {
-        if (error) {
+        if (schedulesError || prodiError) {
           toast.error("Gagal mengambil data dari database.");
         } else {
-          setSchedules(data || []);
+          setSchedules(schedulesData || []);
+          setStudyPrograms(prodiData || []);
         }
         setLoading(false);
       }
@@ -117,11 +153,20 @@ export default function ScheduleMain() {
 
   const filteredSchedules = useMemo(() => {
     return schedules.filter((item) => {
-      const matchProdi = !selectedProdi || item.prodi === selectedProdi;
+      const itemProdi = item.courses?.prodi_code || item.prodi || "";
+      const matchProdi = !selectedProdi || itemProdi === selectedProdi;
+      
       const matchRoom = !selectedRoom || item.room === selectedRoom;
       
-      const courseTitle = item.course_name || item.courseName || "";
-      const matchSubject = !searchSubject || courseTitle.toLowerCase().includes(searchSubject.toLowerCase());
+      const courseTitle =
+        item.courses?.name ||
+        item.course_name ||
+        item.courseName ||
+        "";
+        
+      const matchSubject =
+        !searchSubject ||
+        courseTitle.toLowerCase().includes(searchSubject.toLowerCase());
 
       return matchProdi && matchRoom && matchSubject;
     });
@@ -141,7 +186,11 @@ export default function ScheduleMain() {
   const handleDeleteClick = (id: string, courseName?: string) => {
     const targetItem = schedules.find((s) => s.id === id);
     const resolvedName =
-      courseName || targetItem?.course_name || targetItem?.courseName || "Jadwal";
+      courseName ||
+      targetItem?.courses?.name ||
+      targetItem?.course_name ||
+      targetItem?.courseName ||
+      "Jadwal";
     setDeleteTarget({ id, courseName: resolvedName });
   };
 
@@ -172,14 +221,12 @@ export default function ScheduleMain() {
 
   return (
     <div className="w-full min-h-screen flex flex-col">
-      {/* Navbar diletakkan di luar agar menempel full ke ujung kiri dan kanan layar */}
       <Navbar
         isAdmin={isAdmin}
         onReloadSchedules={reloadSchedules}
         onLogout={handleLogout}
       />
 
-      {/* Konten utama dibungkus padding terpisah */}
       <div className="w-full px-4 md:px-8 py-6 space-y-6 flex-1">
         <Card className="p-7">
           <Tabs defaultValue="monitor">
@@ -228,11 +275,12 @@ export default function ScheduleMain() {
                 </div>
               ) : (
                 <div className="w-full my-4 space-y-4">
-                  <LabStatusBanner/>
+                  <LabStatusBanner />
                   <ScheduleFilterBar
                     selectedProdi={selectedProdi}
                     selectedRoom={selectedRoom}
                     searchSubject={searchSubject}
+                    prodiOptions={studyPrograms}
                     onProdiChange={setSelectedProdi}
                     onRoomChange={setSelectedRoom}
                     onSearchSubjectChange={setSearchSubject}
@@ -252,7 +300,6 @@ export default function ScheduleMain() {
             </TabsContent>
           </Tabs>
         </Card>
-
       </div>
       <FooterHub />
 

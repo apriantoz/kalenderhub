@@ -1,21 +1,36 @@
-// schedule.ts (atau schedule-utils.ts)
+// schedule.ts (Updated untuk Skema Relasional)
+
+export interface Course {
+  id: string;
+  code: string;
+  name: string;
+  sks: number;
+  prodi_code: string;
+  semester: number;
+}
 
 export interface Session {
   id: string;
+  course_id: string;
+  room: string;
+  day: string;
+  start_time: string; // Tipe waktu dari database (biasanya string format "HH:mm:ss")
+  end_time: string;
+  term_type: string;     // Jenis Semester (Gasal / Genap)
+  academic_year: string; // Tahun Ajaran (Contoh: 2025/2026)
+  
+  // Data hasil JOIN dengan tabel courses (biasanya didapat saat melakukan query relasi di Supabase)
+  courses?: Course;
+  
+  // Properti opsional pendukung (untuk fallback jika di frontend kamu masih sering pakai bentuk flat)
   labName?: string;
-  room?: string;
   courseName?: string;
   course_name?: string;
   lecturer?: string;
   prodi?: string;
   semester?: number;
-  term_type?: string;     // <-- Tambahan baru: Jenis Semester (Gasal / Genap)
-  academic_year?: string; // <-- Tambahan baru: Tahun Ajaran (Contoh: 2025/2026)
-  day: string;
   startTime?: string;
-  start_time?: string;
   endTime?: string;
-  end_time?: string;
 }
 
 // Alias untuk kompatibilitas jika file lain mengimport tipe 'Schedule'
@@ -33,7 +48,6 @@ export const DAYS_OF_WEEK = [
 
 /**
  * Mendapatkan nama hari ini dalam Bahasa Indonesia.
- * Jika akhir pekan (Sabtu/Minggu), mengembalikan 'Libur' agar aman dari pencocokan jadwal reguler.
  */
 export function getCurrentDayName(includeWeekend: boolean = false): string {
   const dayIndex = new Date().getDay(); // 0 = Minggu, 1 = Senin, dst.
@@ -67,7 +81,7 @@ export function isSessionActive(
 ): boolean {
   if (!startTime || !endTime) return false;
 
-  const today = getCurrentDayName(false); // Default Senin-Jumat, sesuaikan jika lab buka Sabtu
+  const today = getCurrentDayName(false);
   if (day.trim().toLowerCase() !== today.toLowerCase()) return false;
 
   const now = new Date();
@@ -93,8 +107,7 @@ function isTimeOverlapping(
 }
 
 /**
- * Mendapatkan Set ID dari jadwal-jadwal yang saling bentrok (sama hari, sama ruangan, waktu tumpang tindih).
- * Mendukung properti fleksibel (snake_case / camelCase).
+ * Mendapatkan Set ID dari jadwal-jadwal yang saling bentrok.
  */
 export function getConflictingScheduleIds(schedules: Session[]): Set<string> {
   const conflictingIds = new Set<string>();
@@ -104,7 +117,6 @@ export function getConflictingScheduleIds(schedules: Session[]): Set<string> {
       const itemA = schedules[i];
       const itemB = schedules[j];
 
-      // Normalisasi field day & room
       const dayA = itemA.day?.trim().toLowerCase() || '';
       const dayB = itemB.day?.trim().toLowerCase() || '';
       
@@ -114,7 +126,6 @@ export function getConflictingScheduleIds(schedules: Session[]): Set<string> {
       const sameDay = dayA === dayB;
       const sameRoom = roomA === roomB;
 
-      // Ambil waktu dengan fallback camelCase / snake_case
       const startA = itemA.start_time || itemA.startTime;
       const endA = itemA.end_time || itemA.endTime;
       const startB = itemB.start_time || itemB.startTime;

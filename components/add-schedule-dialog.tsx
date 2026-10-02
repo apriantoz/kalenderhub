@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -24,10 +24,10 @@ import {
   Plus,
   AlertCircleIcon,
   CheckCircle2Icon,
+  Loader2,
 } from "lucide-react";
 import { DAYS_OF_WEEK } from "@/lib/schedule";
 import { LAB_ROOMS } from "@/lib/room-constants";
-import { PRODI } from "@/lib/prodi-constants";
 import { SEMESTERS } from "@/lib/semester-constants";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -39,7 +39,6 @@ import {
   ComboboxList,
 } from "./ui/combobox";
 
-// Helper Default Otomatis Berdasarkan Bulan & Tahun Saat Ini
 const getDefaultAcademicInfo = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -48,7 +47,6 @@ const getDefaultAcademicInfo = () => {
   let term = "Gasal";
   let academicYear = `${year}/${year + 1}`;
 
-  // Januari - Juni masuk Semester Genap tahun ajaran sebelumnya/tahun berjalan
   if (month >= 1 && month <= 6) {
     term = "Genap";
     academicYear = `${year - 1}/${year}`;
@@ -57,7 +55,6 @@ const getDefaultAcademicInfo = () => {
   return { term, academicYear };
 };
 
-// Fungsi helper untuk mengambil initial value dengan aman (SSR / Client check)
 const getInitialTermType = () => {
   if (typeof window === "undefined") return "Gasal";
   const savedTerm = localStorage.getItem("admin_active_term");
@@ -76,16 +73,29 @@ interface AddScheduleDialogProps {
   onSuccess: () => void;
 }
 
+interface CourseItem {
+  id: string;
+  name: string;
+  prodi_code: string;
+  semester: number;
+}
+
 export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // State Form (Menggunakan lazy initial state untuk menghindari useEffect setState)
-  const [courseName, setCourseName] = useState("");
-  const [prodi, setProdi] = useState<string>("");
-  const [semester, setSemester] = useState<string>("");
+  // Data dari Database
+  const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
+  const [studyProgramsMap, setStudyProgramsMap] = useState<Record<string, string>>({}); // prodi_code -> prodi_name
+
+  // State Form
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedCourseName, setSelectedCourseName] = useState("");
+  const [prodi, setProdi] = useState("");
+  const [semester, setSemester] = useState("");
   const [termType, setTermType] = useState<string>(getInitialTermType);
   const [academicYear, setAcademicYear] = useState<string>(getInitialAcademicYear);
   const [day, setDay] = useState(DAYS_OF_WEEK[0]);
@@ -93,15 +103,64 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
   const [endTime, setEndTime] = useState("10:00");
   const [room, setRoom] = useState<string>(LAB_ROOMS[0]);
 
-  // Handle ketika dialog dibuka (jika ingin merefresh nilai dari localStorage saat dialog dibuka kembali)
+  useEffect(() => {
+    if (!open) return;
+
+    let isMounted = true;
+    async function fetchMasterData() {
+      setFetchingData(true);
+      
+      const { data: prodiData } = await supabase
+        .from("study_programs")
+        .select("code, name");
+
+      const { data: courseData } = await supabase
+        .from("courses")
+        .select("id, name, prodi_code, semester")
+        .order("name", { ascending: true });
+
+      if (isMounted) {
+        const prodiMap: Record<string, string> = {};
+        prodiData?.forEach((p) => {
+          prodiMap[p.code] = p.name;
+        });
+        setStudyProgramsMap(prodiMap);
+        setCoursesList(courseData || []);
+        setFetchingData(false);
+      }
+    }
+
+    fetchMasterData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [open]);
+
   const handleOpenChange = (val: boolean) => {
     setOpen(val);
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    
     if (val) {
       setTermType(getInitialTermType());
       setAcademicYear(getInitialAcademicYear());
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      setSelectedCourseId("");
+      setSelectedCourseName("");
+      setProdi("");
+      setSemester("");
+    }
+  };
+
+  // Ketika mata kuliah dipilih dari combobox
+  const handleCourseSelect = (courseNameInput: string) => {
+    setSelectedCourseName(courseNameInput);
+    const found = coursesList.find((c) => c.name === courseNameInput);
+    if (found) {
+      setSelectedCourseId(found.id);
+      setSemester(found.semester ? found.semester.toString() : "");
+      setProdi(found.prodi_code ? (studyProgramsMap[found.prodi_code] || found.prodi_code) : "");
+    } else {
+      setSelectedCourseId("");
     }
   };
 
@@ -110,13 +169,11 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    // Validasi field kosong
-    if (!courseName || !prodi || !room || !semester || !termType || !academicYear) {
-      setErrorMsg("Semua field wajib diisi, bosku!");
+    if (!selectedCourseId || !room || !termType || !academicYear) {
+      setErrorMsg("Mohon pilih Mata Kuliah yang valid dari daftar dan lengkapi field lainnya, bosku!");
       return;
     }
 
-    // Validasi jam
     if (startTime >= endTime) {
       setErrorMsg("Jam selesai harus lebih besar dari jam mulai, bosku!");
       return;
@@ -125,9 +182,7 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
     setLoading(true);
     const { error } = await supabase.from("schedules").insert([
       {
-        course_name: courseName,
-        prodi,
-        semester: Number(semester),
+        course_id: selectedCourseId,
         term_type: termType,
         academic_year: academicYear,
         day,
@@ -143,10 +198,6 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
       setErrorMsg("Gagal menyimpan: " + error.message);
     } else {
       setSuccessMsg("Jadwal berhasil ditambahkan!");
-      setCourseName("");
-      setProdi("");
-      setSemester("");
-
       setTimeout(() => {
         setOpen(false);
         setSuccessMsg(null);
@@ -154,6 +205,8 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
       }, 1000);
     }
   };
+
+  const courseNames = coursesList.map((c) => c.name);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -164,7 +217,10 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-112.5">
         <DialogHeader>
-          <DialogTitle>Tambah Jadwal Perkuliahan</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Tambah Jadwal Perkuliahan
+            {fetchingData && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
@@ -184,57 +240,51 @@ export function AddScheduleDialog({ onSuccess }: AddScheduleDialogProps) {
             </Alert>
           )}
 
+          {/* Mata Kuliah Combobox */}
           <div className="space-y-2">
             <Label htmlFor="course_name">Nama Mata Kuliah</Label>
-            <Input
-              id="course_name"
-              placeholder="Contoh: Pemrograman Web"
-              value={courseName}
-              onChange={(e) => setCourseName(e.target.value)}
-            />
+            <Combobox
+              items={courseNames}
+              value={selectedCourseName}
+              onValueChange={(val) => handleCourseSelect(val ?? "")}
+            >
+              <ComboboxInput placeholder="Pilih Mata Kuliah dari database" />
+              <ComboboxContent>
+                <ComboboxEmpty>Mata kuliah tidak ditemukan di database.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item) => (
+                    <ComboboxItem key={item} value={item}>
+                      {item}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
+            {/* Prodi otomatis terisi */}
             <div className="space-y-2">
-              <Label htmlFor="prodi">Program Studi</Label>
-              <Combobox
-                items={PRODI}
+              <Label htmlFor="prodi">Program Studi (Otomatis)</Label>
+              <Input
+                id="prodi"
+                disabled
                 value={prodi}
-                onValueChange={(val) => setProdi(val ?? "")}
-              >
-                <ComboboxInput placeholder="Pilih Prodi" />
-                <ComboboxContent>
-                  <ComboboxEmpty>Prodi tidak ditemukan</ComboboxEmpty>
-                  <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem key={item} value={item}>
-                        {item}
-                      </ComboboxItem>
-                    )}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
+                placeholder="Pilih MK dulu"
+                className="bg-muted cursor-not-allowed"
+              />
             </div>
 
+            {/* Semester otomatis terisi */}
             <div className="space-y-2">
-              <Label htmlFor="semester">Semester</Label>
-              <Combobox
-                items={SEMESTERS}
+              <Label htmlFor="semester">Semester (Otomatis)</Label>
+              <Input
+                id="semester"
+                disabled
                 value={semester}
-                onValueChange={(val) => setSemester(val ?? "")}
-              >
-                <ComboboxInput placeholder="Semester" />
-                <ComboboxContent>
-                  <ComboboxEmpty>Semester tidak sesuai</ComboboxEmpty>
-                  <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem key={item} value={item}>
-                        {item}
-                      </ComboboxItem>
-                    )}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
+                placeholder="Pilih MK dulu"
+                className="bg-muted cursor-not-allowed"
+              />
             </div>
           </div>
 

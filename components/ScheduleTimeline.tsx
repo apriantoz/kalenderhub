@@ -56,7 +56,7 @@ export function ScheduleTimeline({
   }, [filteredSchedules]);
 
   return (
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-full box-border">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-full box-border">
       {DAYS_OF_WEEK.map((day) => {
         const isToday = day.toLowerCase() === todayName.toLowerCase();
         const daySchedules = schedulesByDay[day] || [];
@@ -72,7 +72,9 @@ export function ScheduleTimeline({
                   <h3 className="font-semibold text-sm tracking-tight">
                     {day}
                   </h3>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">{daySchedules.length} Sesi</Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">
+                    {daySchedules.length} Sesi
+                  </Badge>
                 </div>
               </CardTitle>
               
@@ -98,10 +100,20 @@ export function ScheduleTimeline({
 
                     const startTime = item.start_time || item.startTime || "";
                     const endTime = item.end_time || item.endTime || "";
+                    
+                    // Ambil nama mata kuliah dari relasi courses, dengan fallback ke properti lama
                     const courseName =
+                      item.courses?.name ||
                       item.course_name ||
                       item.courseName ||
                       "Tanpa Nama Mata Kuliah";
+
+                    // Ambil prodi dari relasi courses atau fallback properti lama
+                    const prodiName =
+                      item.courses?.prodi_code ||
+                      item.prodi ||
+                      "";
+
                     const roomName = item.room || item.labName || "-";
 
                     let conflictDetail = "";
@@ -117,10 +129,14 @@ export function ScheduleTimeline({
 
                       if (conflictingPartner) {
                         const partnerCourse =
+                          conflictingPartner.courses?.name ||
                           conflictingPartner.course_name ||
                           conflictingPartner.courseName ||
                           "Matkul Lain";
-                        const partnerProdi = conflictingPartner.prodi || "Prodi Lain";
+                        const partnerProdi =
+                          conflictingPartner.courses?.prodi_code ||
+                          conflictingPartner.prodi ||
+                          "Prodi Lain";
                         conflictDetail = ` (${partnerProdi} - ${partnerCourse})`;
                       }
                     }
@@ -170,10 +186,10 @@ export function ScheduleTimeline({
                                   <Monitor className="h-3 w-3 inline-block mr-1" />
                                   {roomName}
                                 </span>
-                                {item.prodi && (
+                                {prodiName && (
                                   <>
                                     <span>&bull;</span>
-                                    <span className="truncate max-w-[100px]">{item.prodi}</span>
+                                    <span className="truncate max-w-[100px]">{prodiName}</span>
                                   </>
                                 )}
                               </div>

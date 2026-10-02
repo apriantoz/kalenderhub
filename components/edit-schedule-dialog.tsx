@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Schedule, DAYS_OF_WEEK } from "@/lib/schedule";
+import { DAYS_OF_WEEK } from "@/lib/schedule";
 import { LAB_ROOMS } from "@/lib/room-constants";
-import { PRODI } from "@/lib/prodi-constants";
-import { SEMESTERS } from "@/lib/semester-constants";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Pencil, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import {
   Combobox,
   ComboboxContent,
@@ -34,8 +32,25 @@ import {
   ComboboxList,
 } from "./ui/combobox";
 
+interface CourseItem {
+  id: string;
+  name: string;
+  prodi_code: string;
+  semester: number;
+}
+
 interface EditScheduleDialogProps {
-  schedule: Schedule & { term_type?: string; academic_year?: string };
+  schedule: {
+    id: string;
+    course_id?: string;
+    courses?: { name: string; prodi_code: string; semester: number };
+    term_type?: string;
+    academic_year?: string;
+    day: string;
+    start_time: string;
+    end_time: string;
+    room: string;
+  };
   onSuccess: () => void;
 }
 
@@ -45,26 +60,90 @@ export function EditScheduleDialog({
 }: EditScheduleDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const [courseName, setCourseName] = useState(schedule?.course_name || schedule?.courseName || "");
-  const [prodi, setProdi] = useState(schedule?.prodi || "");
-  const [semester, setSemester] = useState(String(schedule?.semester ?? SEMESTERS[0]));
+  // Data dari Database
+  const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
+  const [studyProgramsMap, setStudyProgramsMap] = useState<Record<string, string>>({});
+
+  // State Form
+  const [selectedCourseId, setSelectedCourseId] = useState(schedule?.course_id || "");
+  const [selectedCourseName, setSelectedCourseName] = useState(schedule?.courses?.name || "");
+  const [prodi, setProdi] = useState("");
+  const [semester, setSemester] = useState("");
   const [termType, setTermType] = useState(schedule?.term_type || "Gasal");
   const [academicYear, setAcademicYear] = useState(schedule?.academic_year || "2025/2026");
   const [day, setDay] = useState(schedule?.day || DAYS_OF_WEEK[0]);
-  const [startTime, setStartTime] = useState(schedule?.start_time || schedule?.startTime || "08:00");
-  const [endTime, setEndTime] = useState(schedule?.end_time || schedule?.endTime || "10:00");
-  const [room, setRoom] = useState(schedule?.room || schedule?.labName || LAB_ROOMS[0]);
+  const [startTime, setStartTime] = useState(schedule?.start_time || "08:00");
+  const [endTime, setEndTime] = useState(schedule?.end_time || "10:00");
+  const [room, setRoom] = useState(schedule?.room || LAB_ROOMS[0]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let isMounted = true;
+    async function fetchMasterData() {
+      setFetchingData(true);
+      
+      const { data: prodiData } = await supabase
+        .from("study_programs")
+        .select("code, name");
+
+      const { data: courseData } = await supabase
+        .from("courses")
+        .select("id, name, prodi_code, semester")
+        .order("name", { ascending: true });
+
+      if (isMounted) {
+        const prodiMap: Record<string, string> = {};
+        prodiData?.forEach((p) => {
+          prodiMap[p.code] = p.name;
+        });
+        setStudyProgramsMap(prodiMap);
+        setCoursesList(courseData || []);
+
+        // Jika schedule memiliki course_id, tentukan prodi & semester awalnya
+        if (schedule?.course_id && courseData) {
+          const currentCourse = courseData.find((c) => c.id === schedule.course_id);
+          if (currentCourse) {
+            setSelectedCourseName(currentCourse.name);
+            setSemester(currentCourse.semester ? currentCourse.semester.toString() : "");
+            setProdi(currentCourse.prodi_code ? (prodiMap[currentCourse.prodi_code] || currentCourse.prodi_code) : "");
+          }
+        }
+
+        setFetchingData(false);
+      }
+    }
+
+    fetchMasterData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [open, schedule]);
+
+  const handleCourseSelect = (courseNameInput: string) => {
+    setSelectedCourseName(courseNameInput);
+    const found = coursesList.find((c) => c.name === courseNameInput);
+    if (found) {
+      setSelectedCourseId(found.id);
+      setSemester(found.semester ? found.semester.toString() : "");
+      setProdi(found.prodi_code ? (studyProgramsMap[found.prodi_code] || found.prodi_code) : "");
+    } else {
+      setSelectedCourseId("");
+    }
+  };
 
   const handleUpdate = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!courseName || !prodi || !room || !semester || !termType || !academicYear) {
-      setErrorMsg("Semua field wajib diisi, bosku!");
+    if (!selectedCourseId || !room || !termType || !academicYear) {
+      setErrorMsg("Mohon pilih Mata Kuliah yang valid dan lengkapi field lainnya, bosku!");
       return;
     }
 
@@ -78,9 +157,7 @@ export function EditScheduleDialog({
     const { error } = await supabase
       .from("schedules")
       .update({
-        course_name: courseName,
-        prodi,
-        semester: Number(semester),
+        course_id: selectedCourseId,
         term_type: termType,
         academic_year: academicYear,
         day,
@@ -96,7 +173,6 @@ export function EditScheduleDialog({
       setErrorMsg("Gagal mengupdate jadwal: " + error.message);
     } else {
       setSuccessMsg("Jadwal berhasil diperbarui!");
-
       setTimeout(() => {
         setOpen(false);
         setSuccessMsg(null);
@@ -105,6 +181,8 @@ export function EditScheduleDialog({
     }
   };
 
+  const courseNames = coursesList.map((c) => c.name);
+
   return (
     <Dialog
       open={open}
@@ -112,18 +190,6 @@ export function EditScheduleDialog({
         setOpen(val);
         setErrorMsg(null);
         setSuccessMsg(null);
-        
-        if (val && schedule) {
-          setCourseName(schedule.course_name || schedule.courseName || "");
-          setProdi(schedule.prodi || "");
-          setSemester(String(schedule.semester ?? SEMESTERS[0]));
-          setTermType(schedule.term_type || "Gasal");
-          setAcademicYear(schedule.academic_year || "2025/2026");
-          setDay(schedule.day || DAYS_OF_WEEK[0]);
-          setStartTime(schedule.start_time || schedule.startTime || "08:00");
-          setEndTime(schedule.end_time || schedule.endTime || "10:00");
-          setRoom(schedule.room || schedule.labName || LAB_ROOMS[0]);
-        }
       }}
     >
       <DialogTrigger
@@ -141,7 +207,10 @@ export function EditScheduleDialog({
 
       <DialogContent className="sm:max-w-112.5">
         <DialogHeader>
-          <DialogTitle>Edit Jadwal Perkuliahan</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Edit Jadwal Perkuliahan
+            {fetchingData && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleUpdate} className="space-y-4 mt-2">
@@ -159,59 +228,51 @@ export function EditScheduleDialog({
             </div>
           )}
 
+          {/* Mata Kuliah Combobox */}
           <div className="space-y-2">
             <Label htmlFor="edit_course_name">Nama Mata Kuliah</Label>
-            <Input
-              id="edit_course_name"
-              value={courseName}
-              onChange={(e) => setCourseName(e.target.value)}
-              required
-            />
+            <Combobox
+              items={courseNames}
+              value={selectedCourseName}
+              onValueChange={(val) => handleCourseSelect(val ?? "")}
+            >
+              <ComboboxInput placeholder="Pilih Mata Kuliah dari database" />
+              <ComboboxContent>
+                <ComboboxEmpty>Mata kuliah tidak ditemukan.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item) => (
+                    <ComboboxItem key={item} value={item}>
+                      {item}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="edit_prodi">Program Studi</Label>
-              <Combobox
-                items={PRODI}
+              <Label htmlFor="edit_prodi">Program Studi (Otomatis)</Label>
+              <Input
+                id="edit_prodi"
+                disabled
                 value={prodi}
-                onValueChange={(val) => setProdi(val ?? "")}
-              >
-                <ComboboxInput placeholder="Pilih Prodi" />
-                <ComboboxContent>
-                  <ComboboxEmpty>Prodi tidak ditemukan</ComboboxEmpty>
-                  <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem key={item} value={item}>
-                        {item}
-                      </ComboboxItem>
-                    )}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
+                className="bg-muted cursor-not-allowed"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit_semester">Semester</Label>
-              <Select
+              <Label htmlFor="edit_semester">Semester (Otomatis)</Label>
+              <Input
+                id="edit_semester"
+                disabled
                 value={semester}
-                onValueChange={(val) => setSemester(val ?? String(SEMESTERS[0]))}
-              >
-                <SelectTrigger id="edit_semester" className="w-full">
-                  <SelectValue placeholder="Pilih Semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SEMESTERS.map((sem) => (
-                    <SelectItem key={sem} value={String(sem)}>
-                      Semester {sem}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                className="bg-muted cursor-not-allowed"
+              />
             </div>
           </div>
 
-          {/* Baris Baru: Jenis Semester & Tahun Ajaran */}
+          {/* Jenis Semester & Tahun Ajaran */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="edit_term_type">Jenis Semester</Label>

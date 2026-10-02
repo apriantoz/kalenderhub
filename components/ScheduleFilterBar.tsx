@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Filter,
   RotateCcw,
   Download,
   FileSpreadsheet,
@@ -30,13 +29,19 @@ import {
   CardAction,
 } from "@/components/ui/card";
 import { LAB_ROOMS } from "@/lib/room-constants";
-import { PRODI } from "@/lib/prodi-constants";
 import { Schedule } from "@/lib/schedule";
+
+// Tambahkan interface untuk menampung opsi prodi dinamis (opsional dengan fallback)
+export interface ProdiOption {
+  code: string;
+  name: string;
+}
 
 interface ScheduleFilterBarProps {
   selectedProdi: string;
   selectedRoom: string;
   searchSubject: string;
+  prodiOptions?: (string | ProdiOption)[]; // Bisa nerima string array atau objek dari database
   onProdiChange: (value: string) => void;
   onRoomChange: (value: string) => void;
   onSearchSubjectChange: (value: string) => void;
@@ -48,13 +53,13 @@ export function ScheduleFilterBar({
   selectedProdi,
   selectedRoom,
   searchSubject,
+  prodiOptions = [],
   onProdiChange,
   onRoomChange,
   onSearchSubjectChange,
   onResetFilter,
   filteredSchedules,
 }: ScheduleFilterBarProps) {
-  const prodiOptions = PRODI;
   const roomOptions = LAB_ROOMS;
 
   const isFiltered =
@@ -84,29 +89,39 @@ export function ScheduleFilterBar({
               {/* Filter Prodi */}
               <Select
                 value={selectedProdi}
-                onValueChange={(val) => onProdiChange(val ?? "")}
+                onValueChange={(val) => onProdiChange(val === "ALL" ? "" : (val ?? ""))}
               >
                 <SelectTrigger className="w-full sm:w-[150px] text-xs h-10 bg-background">
                   <SelectValue placeholder="Semua Prodi" />
                 </SelectTrigger>
                 <SelectContent>
-                  {prodiOptions.map((prodi) => (
-                    <SelectItem key={prodi} value= {prodi} className="text-xs">
-                      {prodi}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="ALL" className="text-xs font-medium">
+                    Semua Prodi
+                  </SelectItem>
+                  {prodiOptions.map((prodi) => {
+                    const code = typeof prodi === "string" ? prodi : prodi.code;
+                    const label = typeof prodi === "string" ? prodi : `${prodi.code} - ${prodi.name}`;
+                    return (
+                      <SelectItem key={code} value={code} className="text-xs">
+                        {label}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
 
               {/* Filter Ruangan */}
               <Select
                 value={selectedRoom}
-                onValueChange={(val) => onRoomChange(val ?? "")}
+                onValueChange={(val) => onRoomChange(val === "ALL" ? "" : (val ?? ""))}
               >
                 <SelectTrigger className="w-full sm:w-[150px] text-xs h-10 bg-background">
                   <SelectValue placeholder="Semua Ruangan" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="ALL" className="text-xs font-medium">
+                    Semua Ruangan
+                  </SelectItem>
                   {roomOptions.map((room) => (
                     <SelectItem key={room} value={room} className="text-xs">
                       {room}
@@ -126,34 +141,32 @@ export function ScheduleFilterBar({
                   <span>Reset</span>
                 </Button>
               )}
-
               <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                    >
-                      <Download className="h-3.5 w-3.5 text-primary" /><span className="text-xs">Download</span>
-                    </Button>
-                  }
-                />
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem
-                    onClick={() => exportToExcel(filteredSchedules)}
-                    className="cursor-pointer gap-2 text-xs py-2"
-                  >
-                    <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
-                    <span>Excel (.xlsx)</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => exportToPDF(filteredSchedules)}
-                    className="cursor-pointer gap-2 text-xs py-2"
-                  >
-                    <FileText className="h-4 w-4 text-rose-400" />
-                    <span>PDF (.pdf)</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+  <DropdownMenuTrigger
+    render={
+      <Button variant="outline">
+        <Download className="h-3.5 w-3.5 text-primary" />
+        <span className="text-xs">Download</span>
+      </Button>
+    }
+  />
+  <DropdownMenuContent align="end" className="w-44">
+    <DropdownMenuItem
+      onClick={() => exportToExcel(filteredSchedules)}
+      className="cursor-pointer gap-2 text-xs py-2"
+    >
+      <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
+      <span>Excel (.xlsx)</span>
+    </DropdownMenuItem>
+    <DropdownMenuItem
+      onClick={() => exportToPDF(filteredSchedules)}
+      className="cursor-pointer gap-2 text-xs py-2"
+    >
+      <FileText className="h-4 w-4 text-rose-400" />
+      <span>PDF (.pdf)</span>
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
             </div>
           </CardAction>
         </CardHeader>

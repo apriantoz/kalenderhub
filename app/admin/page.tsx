@@ -14,9 +14,11 @@ import {
   Settings,
   Info,
   Activity,
+  BookOpen,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LabMaintenanceCard } from "@/components/LabMaintenanceCard";
+import { StudyProgramManagerCard } from "@/components/StudyProgramManagerCard"; // Komponen baru manajemen prodi & courses
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -77,7 +79,7 @@ export default function AdminDashboardPage() {
             Manajemen Laboratorium & Akademik
           </h1>
           <p className="text-sm text-muted-foreground">
-            Kelola tahun ajaran aktif, jenis semester, dan pemeliharaan 12 laboratorium komputer ISI Bali.
+            Kelola tahun ajaran aktif, jenis semester, kurikulum prodi, dan pemeliharaan lab komputer ISI Bali.
           </p>
         </div>
 
@@ -156,22 +158,30 @@ export default function AdminDashboardPage() {
 
       {/* Navigasi Tab Utama Panel Admin */}
       <Tabs defaultValue="maintenance" className="w-full">
-        <TabsList variant="default" className="grid w-full grid-cols-2 lg:w-[420px] h-11 p-1">
-          <TabsTrigger value="maintenance" className="gap-2 text-xs font-medium">
+        <TabsList variant="default" className="grid w-full grid-cols-1 sm:grid-cols-3 lg:w-[600px] h-auto sm:h-11 p-1 gap-1">
+          <TabsTrigger value="maintenance" className="gap-2 text-xs font-medium py-2">
             <Wrench className="h-4 w-4" /> Pemeliharaan Lab
           </TabsTrigger>
-          <TabsTrigger value="academic" className="gap-2 text-xs font-medium">
+          <TabsTrigger value="curriculum" className="gap-2 text-xs font-medium py-2">
+            <BookOpen className="h-4 w-4" /> Kurikulum & Prodi
+          </TabsTrigger>
+          <TabsTrigger value="academic" className="gap-2 text-xs font-medium py-2">
             <Settings className="h-4 w-4" /> Akademik & Sistem
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab 1: Pemeliharaan Lab (Fokus Utama Operasional) */}
-        <TabsContent value="maintenance" className="space-y-6">
+        {/* Tab 1: Pemeliharaan Lab */}
+        <TabsContent value="maintenance" className="space-y-6 pt-4">
           <LabMaintenanceCard />
         </TabsContent>
 
-        {/* Tab 2: Akademik & Konfigurasi Sistem */}
-        <TabsContent value="academic" className="space-y-6">
+        {/* Tab 2: Kurikulum & Prodi (Baru) */}
+        <TabsContent value="curriculum" className="space-y-6 pt-4">
+          <StudyProgramManagerCard />
+        </TabsContent>
+
+        {/* Tab 3: Akademik & Konfigurasi Sistem */}
+        <TabsContent value="academic" className="space-y-6 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <AcademicSettingsCard />
 
@@ -198,7 +208,7 @@ export default function AdminDashboardPage() {
                       Sistem mendeteksi bentrok jadwal secara otomatis berdasarkan ruangan lab dan waktu.
                     </li>
                     <li>
-                      Pastikan status lab diperbarui jika ada perbaikan perangkat keras atau instalasi software baru.
+                      Pastikan data program studi dan mata kuliah di tab <strong className="text-foreground">Kurikulum & Prodi</strong> selalu terbarui agar pilihan filter jadwal akurat.
                     </li>
                   </ul>
                 </div>
