@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookOpen, Layers, Plus, Trash2, Loader2 } from "lucide-react";
+import { BookOpen, Layers, Plus, Trash2, Pencil, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export interface StudyProgram {
@@ -54,13 +54,19 @@ export function StudyProgramManagerCard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // State Form Prodi
+  // State Form Tambah Prodi
   const [prodiCode, setProdiCode] = useState("");
   const [prodiName, setProdiName] = useState("");
   const [isProdiDialogOpen, setIsProdiDialogOpen] = useState(false);
   const [submittingProdi, setSubmittingProdi] = useState(false);
 
-  // State Form Course
+  // State Form Edit Prodi
+  const [isEditProdiOpen, setIsEditProdiOpen] = useState(false);
+  const [selectedProdi, setSelectedProdi] = useState<StudyProgram | null>(null);
+  const [editProdiCode, setEditProdiCode] = useState("");
+  const [editProdiName, setEditProdiName] = useState("");
+
+  // State Form Tambah Course
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [courseSks, setCourseSks] = useState("3");
@@ -69,26 +75,31 @@ export function StudyProgramManagerCard() {
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [submittingCourse, setSubmittingCourse] = useState(false);
 
-  const fetchData = async () => {
+  // State Form Edit Course
+  const [isEditCourseOpen, setIsEditCourseOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [editCourseCode, setEditCourseCode] = useState("");
+  const [editCourseName, setEditCourseName] = useState("");
+  const [editCourseSks, setEditCourseSks] = useState("3");
+  const [editCourseProdiCode, setEditCourseProdiCode] = useState("");
+  const [editCourseSemester, setEditCourseSemester] = useState("1");
+
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data: prodiData, error: prodiError } = await supabase
+    const { data: prodiData } = await supabase
       .from("study_programs")
       .select("*")
       .order("code", { ascending: true });
 
-    const { data: courseData, error: courseError } = await supabase
+    const { data: courseData } = await supabase
       .from("courses")
       .select("*")
       .order("code", { ascending: true });
 
-    if (prodiError || courseError) {
-      toast.error("Gagal memuat data kurikulum dan prodi.");
-    } else {
-      setStudyPrograms(prodiData || []);
-      setCourses(courseData || []);
-    }
+    setStudyPrograms(prodiData || []);
+    setCourses(courseData || []);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -144,6 +155,30 @@ export function StudyProgramManagerCard() {
     setSubmittingProdi(false);
   };
 
+  // Handler Edit Prodi
+  const handleUpdateProdi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProdi || !editProdiCode || !editProdiName) {
+      toast.error("Semua field wajib diisi!");
+      return;
+    }
+
+    setSubmittingProdi(true);
+    const { error } = await supabase
+      .from("study_programs")
+      .update({ code: editProdiCode.toUpperCase(), name: editProdiName })
+      .eq("id", selectedProdi.id);
+
+    if (error) {
+      toast.error(`Gagal mengupdate prodi: ${error.message}`);
+    } else {
+      toast.success("Program Studi berhasil diperbarui!");
+      setIsEditProdiOpen(false);
+      fetchData();
+    }
+    setSubmittingProdi(false);
+  };
+
   // Handler Hapus Prodi
   const handleDeleteProdi = async (id: string, code: string) => {
     if (!confirm(`Yakin ingin menghapus Prodi ${code}?`)) return;
@@ -183,6 +218,36 @@ export function StudyProgramManagerCard() {
       setCourseCode("");
       setCourseName("");
       setIsCourseDialogOpen(false);
+      fetchData();
+    }
+    setSubmittingCourse(false);
+  };
+
+  // Handler Edit Course
+  const handleUpdateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourse || !editCourseCode || !editCourseName || !editCourseProdiCode) {
+      toast.error("Semua field utama wajib diisi!");
+      return;
+    }
+
+    setSubmittingCourse(true);
+    const { error } = await supabase
+      .from("courses")
+      .update({
+        code: editCourseCode.toUpperCase(),
+        name: editCourseName,
+        sks: parseInt(editCourseSks) || 3,
+        prodi_code: editCourseProdiCode,
+        semester: parseInt(editCourseSemester) || 1,
+      })
+      .eq("id", selectedCourse.id);
+
+    if (error) {
+      toast.error(`Gagal mengupdate mata kuliah: ${error.message}`);
+    } else {
+      toast.success("Mata kuliah berhasil diperbarui!");
+      setIsEditCourseOpen(false);
       fetchData();
     }
     setSubmittingCourse(false);
@@ -228,7 +293,6 @@ export function StudyProgramManagerCard() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Tombol Aksi Sesuai Tab Aktif */}
             <div>
               <TabsContent value="prodi" className="mt-0">
                 <Dialog open={isProdiDialogOpen} onOpenChange={setIsProdiDialogOpen}>
@@ -386,7 +450,7 @@ export function StudyProgramManagerCard() {
             </div>
           </div>
 
-          {/* Konten Tab 1: Tabel Program Studi */}
+          {/* Tabel Program Studi */}
           <TabsContent value="prodi" className="space-y-4">
             <div className="rounded-md border overflow-hidden">
               <Table>
@@ -394,7 +458,7 @@ export function StudyProgramManagerCard() {
                   <TableRow>
                     <TableHead className="w-30">Kode</TableHead>
                     <TableHead>Nama Program Studi</TableHead>
-                    <TableHead className="text-right w-25">Aksi</TableHead>
+                    <TableHead className="text-right w-28">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -416,7 +480,20 @@ export function StudyProgramManagerCard() {
                       <TableRow key={prodi.id}>
                         <TableCell className="font-semibold">{prodi.code}</TableCell>
                         <TableCell>{prodi.name}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => {
+                              setSelectedProdi(prodi);
+                              setEditProdiCode(prodi.code);
+                              setEditProdiName(prodi.name);
+                              setIsEditProdiOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -434,7 +511,7 @@ export function StudyProgramManagerCard() {
             </div>
           </TabsContent>
 
-          {/* Konten Tab 2: Tabel Mata Kuliah */}
+          {/* Tabel Mata Kuliah */}
           <TabsContent value="courses" className="space-y-4">
             <div className="rounded-md border overflow-hidden">
               <Table>
@@ -445,7 +522,7 @@ export function StudyProgramManagerCard() {
                     <TableHead className="w-22.5">Prodi</TableHead>
                     <TableHead className="w-20">SKS</TableHead>
                     <TableHead className="w-22.5">Semester</TableHead>
-                    <TableHead className="text-right w-20">Aksi</TableHead>
+                    <TableHead className="text-right w-28">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -474,7 +551,23 @@ export function StudyProgramManagerCard() {
                         </TableCell>
                         <TableCell>{courseItem.sks}</TableCell>
                         <TableCell>Sem {courseItem.semester}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => {
+                              setSelectedCourse(courseItem);
+                              setEditCourseCode(courseItem.code);
+                              setEditCourseName(courseItem.name);
+                              setEditCourseSks(String(courseItem.sks));
+                              setEditCourseProdiCode(courseItem.prodi_code);
+                              setEditCourseSemester(String(courseItem.semester));
+                              setIsEditCourseOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -493,6 +586,136 @@ export function StudyProgramManagerCard() {
           </TabsContent>
         </Tabs>
       </CardContent>
+
+      {/* Dialog Edit Prodi */}
+      <Dialog open={isEditProdiOpen} onOpenChange={setIsEditProdiOpen}>
+        <DialogContent>
+          <form onSubmit={handleUpdateProdi}>
+            <DialogHeader>
+              <DialogTitle>Edit Program Studi</DialogTitle>
+              <DialogDescription>Perbarui informasi kode atau nama program studi.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="editProdiCode">Kode Prodi</Label>
+                <Input
+                  id="editProdiCode"
+                  value={editProdiCode}
+                  onChange={(e) => setEditProdiCode(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editProdiName">Nama Program Studi</Label>
+                <Input
+                  id="editProdiName"
+                  value={editProdiName}
+                  onChange={(e) => setEditProdiName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditProdiOpen(false)}>
+                Batal
+              </Button>
+              <Button type="submit" disabled={submittingProdi}>
+                {submittingProdi && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Simpan Perubahan
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Edit Course */}
+      <Dialog open={isEditCourseOpen} onOpenChange={setIsEditCourseOpen}>
+        <DialogContent className="max-w-md">
+          <form onSubmit={handleUpdateCourse}>
+            <DialogHeader>
+              <DialogTitle>Edit Mata Kuliah</DialogTitle>
+              <DialogDescription>Perbarui detail informasi mata kuliah.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="editCourseCode">Kode MK</Label>
+                  <Input
+                    id="editCourseCode"
+                    value={editCourseCode}
+                    onChange={(e) => setEditCourseCode(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editCourseSks">Jumlah SKS</Label>
+                  <Input
+                    id="editCourseSks"
+                    type="number"
+                    min="1"
+                    max="6"
+                    value={editCourseSks}
+                    onChange={(e) => setEditCourseSks(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editCourseName">Nama Mata Kuliah</Label>
+                <Input
+                  id="editCourseName"
+                  value={editCourseName}
+                  onChange={(e) => setEditCourseName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="editCourseProdi">Program Studi</Label>
+                  <Select
+                    value={editCourseProdiCode}
+                    onValueChange={(val) => setEditCourseProdiCode(val ?? "")}
+                  >
+                    <SelectTrigger id="editCourseProdi">
+                      <SelectValue placeholder="Pilih Prodi" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {studyPrograms.map((p) => (
+                        <SelectItem key={p.id} value={p.code}>
+                          {p.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editCourseSemester">Semester</Label>
+                  <Input
+                    id="editCourseSemester"
+                    type="number"
+                    min="1"
+                    max="8"
+                    value={editCourseSemester}
+                    onChange={(e) => setEditCourseSemester(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditCourseOpen(false)}>
+                Batal
+              </Button>
+              <Button type="submit" disabled={submittingCourse}>
+                {submittingCourse && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Simpan Perubahan
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
